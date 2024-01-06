@@ -21,6 +21,7 @@ class ParserTest {
             val parser = Parser()
             val input = """
             import /stdlib/io/println
+            import /stdlib/entrypoint
 
             @entrypoint
             def main():
@@ -34,7 +35,10 @@ class ParserTest {
                 ast,
                 equalTo(
                     SourceFile(
-                        listOf(ImportStatement(listOf("stdlib", "io", "println"))),
+                        listOf(
+                            ImportStatement(listOf("stdlib", "io", "println")),
+                            ImportStatement(listOf("stdlib", "entrypoint"))
+                        ),
                         listOf(
                             TopLevelDefinition.Function(
                                 listOf(Annotation("entrypoint")),

@@ -27,6 +27,7 @@ class LexerTest {
         val input = stream(
             """
             import /stdlib/io/println
+            import /stdlib/entrypoint
 
             @entrypoint
             def main():
@@ -40,6 +41,7 @@ class LexerTest {
             parsedLines, equalTo(
                 listOf(
                     Alphanumeric("import"), Whitespace(1), Symbol("/"), Alphanumeric("stdlib"), Symbol("/"), Alphanumeric("io"), Symbol("/"), Alphanumeric("println"), Newline,
+                    Alphanumeric("import"), Whitespace(1), Symbol("/"), Alphanumeric("stdlib"), Symbol("/"), Alphanumeric("entrypoint"), Newline,
                     EmptyLine,
                     Symbol("@"), Alphanumeric("entrypoint"), Newline,
                     Alphanumeric("def"), Whitespace(1), Alphanumeric("main"), Symbol("():"), Newline,
