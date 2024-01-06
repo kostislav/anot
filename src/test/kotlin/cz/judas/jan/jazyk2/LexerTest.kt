@@ -11,8 +11,7 @@ import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.io.InputStream
-import java.lang.RuntimeException
+import java.io.Reader
 import kotlin.test.assertEquals
 
 class LexerTest {
@@ -25,7 +24,7 @@ class LexerTest {
 
     @Test
     fun parsesHelloWorld() {
-        val input = inputStream(
+        val input = stream(
             """
             import /stdlib/io/println
 
@@ -52,13 +51,13 @@ class LexerTest {
 
     @Test
     fun failsForInvalidInput() {
-        val input = inputStream("import ^eh")
+        val input = stream("import ^eh")
 
         val exception = assertThrows<RuntimeException> { lexer.parseTokens(input) }
         assertEquals(exception.message, "Unexpected character ^ on line 1 at position 8")
     }
 
-    private fun inputStream(content: String): InputStream {
-        return content.byteInputStream()
+    private fun stream(content: String): Reader {
+        return content.reader()
     }
 }

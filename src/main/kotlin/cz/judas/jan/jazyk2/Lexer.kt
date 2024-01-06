@@ -1,12 +1,12 @@
 package cz.judas.jan.jazyk2
 
-import java.io.InputStream
+import java.io.Reader
 
 class Lexer {
     private val symbols = setOf('/', '(', ')', '@', ':')
 
-    fun parseTokens(input: InputStream): List<Token> {
-        return input.reader().readLines()
+    fun parseTokens(input: Reader): List<Token> {
+        return input.readLines()
             .flatMapIndexed(::parseLine)
     }
 
