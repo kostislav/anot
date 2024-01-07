@@ -1,28 +1,26 @@
 package cz.judas.jan.jazyk2
 
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.div
-import kotlin.io.path.writeLines
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+
+
+class Compiler(private val backend: Backend) {
+    private val frontend = Frontend()
+
+    fun compile(sourceDir: Path) {
+        val buildDir = (sourceDir / "build").createDirectories()
+        val sourceFile = (sourceDir / "src").listDirectoryEntries().first()
+        val packageAsts = frontend.process(sourceFile)
+        backend.compile(packageAsts, buildDir, sourceDir.name)
+    }
+}
 
 
 fun main() {
-    val buildDir = Path("build")
-    buildDir.createDirectories()
-
-    val moduleFile = buildDir / "go.mod"
-    moduleFile.writeLines(listOf(
-        "module jazyk/main",
-        "go 1.20"
-    ))
-
-    val goFile = buildDir / "main.go"
-    goFile.writeLines(listOf(
-        "package main",
-        "func main() {",
-        "  print(\"Hello, World!\\n\")",
-        "}"
-    ))
-    val process = ProcessBuilder(listOf("go", "build", "-ldflags", "-s -w")).directory(buildDir.toFile()).start()
-    process.waitFor()
+    val compiler = Compiler(GoBackend())
+    compiler.compile(Path(""))
 }
