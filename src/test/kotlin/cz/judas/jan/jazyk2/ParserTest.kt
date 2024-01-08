@@ -11,6 +11,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.io.path.Path
+import kotlin.io.path.reader
 
 class ParserTest {
     @Nested
@@ -19,14 +21,7 @@ class ParserTest {
         fun parsesHelloWorld() {
             val lexer = Lexer()
             val parser = Parser()
-            val input = """
-            import /stdlib/io/println
-            import /stdlib/entrypoint
-
-            @entrypoint
-            def main():
-                println('Hello, world')
-        """.trimIndent().reader()
+            val input = Path("examples/hello/src/hello.jaz").reader()
 
             val tokens = lexer.parseTokens(input)
             val ast = parser.parseFile(tokens)
@@ -42,7 +37,7 @@ class ParserTest {
                         listOf(
                             TopLevelDefinition.Function(
                                 listOf(Annotation("entrypoint")),
-                                "main",
+                                "hello",
                                 listOf(
                                     Statement.FunctionCallStatement(
                                         FunctionCall(

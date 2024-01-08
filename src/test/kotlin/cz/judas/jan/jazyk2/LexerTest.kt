@@ -11,7 +11,8 @@ import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.io.Reader
+import kotlin.io.path.Path
+import kotlin.io.path.reader
 import kotlin.test.assertEquals
 
 class LexerTest {
@@ -24,16 +25,7 @@ class LexerTest {
 
     @Test
     fun parsesHelloWorld() {
-        val input = stream(
-            """
-            import /stdlib/io/println
-            import /stdlib/entrypoint
-
-            @entrypoint
-            def main():
-                println('Hello, world')
-        """.trimIndent()
-        )
+        val input = Path("examples/hello/src/hello.jaz").reader()
 
         val parsedLines = lexer.parseTokens(input)
 
@@ -44,7 +36,7 @@ class LexerTest {
                     Alphanumeric("import"), Whitespace(1), Symbol("/"), Alphanumeric("stdlib"), Symbol("/"), Alphanumeric("entrypoint"), Newline,
                     EmptyLine,
                     Symbol("@"), Alphanumeric("entrypoint"), Newline,
-                    Alphanumeric("def"), Whitespace(1), Alphanumeric("main"), Symbol("():"), Newline,
+                    Alphanumeric("def"), Whitespace(1), Alphanumeric("hello"), Symbol("():"), Newline,
                     Whitespace(4), Alphanumeric("println"), Symbol("("), StringValue("Hello, world"), Symbol(")"), Newline
                 )
             )
@@ -53,13 +45,9 @@ class LexerTest {
 
     @Test
     fun failsForInvalidInput() {
-        val input = stream("import ^eh")
+        val input = "import ^eh".reader()
 
         val exception = assertThrows<RuntimeException> { lexer.parseTokens(input) }
         assertEquals(exception.message, "Unexpected character ^ on line 1 at position 8")
-    }
-
-    private fun stream(content: String): Reader {
-        return content.reader()
     }
 }
