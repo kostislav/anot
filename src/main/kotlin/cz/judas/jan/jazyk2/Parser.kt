@@ -9,6 +9,7 @@ import cz.judas.jan.jazyk2.ast.untyped.Statement
 import cz.judas.jan.jazyk2.ast.untyped.TopLevelDefinition
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
+import kotlin.reflect.typeOf
 
 class Parser {
     fun parseFile(tokens: List<Token>): SourceFile {
@@ -21,23 +22,32 @@ class Parser {
     }
 
     private fun imports(stream: TokenStream): List<ImportStatement> {
-        val imports = mutableListOf<ImportStatement>()
-
-        while (stream.hasNext() && stream.current() == importKeyword) {
+        return if (stream.current() == importKeyword) {
             stream.advance()
-            stream.expectType(Token.Whitespace::class)
-            imports += ImportStatement(
-                stream.consumeUntil { it is Token.Newline }
-                    .filterIsInstance<Token.Alphanumeric>()
-                    .map { it.value }
-            )
+            val imports = mutableListOf<ImportStatement>()
+            stream.expect(colon)
+            stream.expect(Token.Newline)
+            val indent = stream.expectType<Token.Whitespace>()
+            imports += importStatement(stream)
+            while (stream.current() != Token.EmptyLine) {
+                stream.expect(indent)
+                imports += importStatement(stream)
+            }
             stream.advance()
+            imports
+        } else {
+            emptyList()
         }
+    }
 
-        stream.expect(Token.EmptyLine)
-        stream.dropWhile { it == Token.EmptyLine }
-
-        return imports
+    private fun importStatement(stream: TokenStream): ImportStatement {
+        val result = ImportStatement(
+            stream.consumeUntil { it is Token.Newline }
+                .filterIsInstance<Token.Alphanumeric>()
+                .map { it.value }
+        )
+        stream.advance()
+        return result
     }
 
     private fun topLevelDefinitions(stream: TokenStream): List<TopLevelDefinition> {
@@ -55,11 +65,11 @@ class Parser {
 
         if (stream.current() == defKeyword) {
             stream.advance()
-            stream.expectType(Token.Whitespace::class)
-            val name = stream.expectType(Token.Alphanumeric::class).value
+            stream.expectType<Token.Whitespace>()
+            val name = stream.expectType<Token.Alphanumeric>().value
             stream.expect(Token.Symbol("():"))
             stream.expect(Token.Newline)
-            val indent = stream.expectType(Token.Whitespace::class).amount
+            val indent = stream.expectType<Token.Whitespace>().amount
             return TopLevelDefinition.Function(
                 annotations,
                 name,
@@ -113,6 +123,7 @@ class Parser {
         val atSign = Token.Symbol("@")
         val openingRoundBracket = Token.Symbol("(")
         val closingRoundBracket = Token.Symbol(")")
+        val colon = Token.Symbol(":")
     }
 
     private class TokenStream(private val tokens: List<Token>) {
@@ -151,6 +162,11 @@ class Parser {
             } else {
                 advance()
             }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        inline fun <reified T: Token> expectType(): T {
+            return expectType(typeOf<T>().classifier as KClass<T>)
         }
 
         fun <T: Token> expectType(tokenType: KClass<T>): T {
