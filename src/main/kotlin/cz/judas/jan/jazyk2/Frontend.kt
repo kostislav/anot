@@ -9,11 +9,11 @@ class Frontend {
     private val parser = Parser()
     private val typer = Typer()
 
-    fun process(sourceFile: Path): Package {
+    fun process(filePackage: List<String>, sourceFile: Path): Package {
         return sourceFile.reader().use { reader ->
             val tokens = lexer.parseTokens(reader)
             val ast = parser.parseFile(tokens)
-            typer.addTypeInfo(ast)
+            typer.addTypeInfo(filePackage, ast)
         }
     }
 }

@@ -15,22 +15,22 @@ import cz.judas.jan.jazyk2.ast.untyped.SourceFile as UntypedSourceFile
 import cz.judas.jan.jazyk2.ast.untyped.Statement as UntypedStatement
 
 class Typer {
-    fun addTypeInfo(untypedSourceFile: UntypedSourceFile): TypedSourceFile {
+    fun addTypeInfo(filePackage: List<String>, untypedSourceFile: UntypedSourceFile): TypedSourceFile {
         val importedSymbols = untypedSourceFile.imports
             .map { it.importedPath }
             .associate { it.last() to FullyQualifiedType(it) }
 
         val functions = untypedSourceFile.definitions
             .filterIsInstance<TopLevelDefinition.Function>()
-            .map { resolve(it, importedSymbols) }
+            .map { resolve(it, filePackage, importedSymbols) }
 
         return TypedSourceFile(functions)
     }
 
-    private fun resolve(untypedFunction: TopLevelDefinition.Function, importedSymbols: Map<String, FullyQualifiedType>): Function {
+    private fun resolve(untypedFunction: TopLevelDefinition.Function, filePackage: List<String>, importedSymbols: Map<String, FullyQualifiedType>): Function {
         return Function(
             untypedFunction.annotations.map { resolve(it, importedSymbols) },
-            untypedFunction.name,
+            FullyQualifiedType(filePackage + untypedFunction.name),
             untypedFunction.body.map { resolve(it, importedSymbols) }
         )
     }

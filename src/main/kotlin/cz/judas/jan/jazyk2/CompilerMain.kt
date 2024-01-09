@@ -9,12 +9,14 @@ import kotlin.io.path.name
 
 
 class Compiler(private val backend: Backend) {
+    private val configReader = ProjectConfigReader()
     private val frontend = Frontend()
 
     fun compile(sourceDir: Path) {
+        val projectConfig = configReader.forProject(sourceDir)
         val buildDir = (sourceDir / "build").createDirectories()
         val sourceFile = (sourceDir / "src").listDirectoryEntries().first()
-        val packageAsts = frontend.process(sourceFile)
+        val packageAsts = frontend.process(projectConfig.basePackage, sourceFile)
         backend.compile(packageAsts, buildDir, sourceDir.name)
     }
 }
@@ -22,5 +24,5 @@ class Compiler(private val backend: Backend) {
 
 fun main() {
     val compiler = Compiler(GoBackend())
-    compiler.compile(Path(""))
+    compiler.compile(Path("examples/hello"))
 }

@@ -6,7 +6,7 @@ data class Package(
 
 data class Function(
     val annotations: List<Annotation>,
-    val name: String,
+    val name: FullyQualifiedType,
     val body: List<Statement>
 )
 
@@ -23,4 +23,6 @@ sealed interface Expression {
 data class FunctionCall(val function: FullyQualifiedType, val arguments: List<Expression>)
 
 @JvmInline
-value class FullyQualifiedType(val path: List<String>)
+value class FullyQualifiedType(val path: List<String>) {
+    fun name(): String = path.last()
+}

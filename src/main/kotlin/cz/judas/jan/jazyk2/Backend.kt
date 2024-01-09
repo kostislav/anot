@@ -28,16 +28,14 @@ class GoBackend : Backend {
         val goSourceCode = StringBuilder("package main").append("\n")
 
         val mainFunction = source.functions.first { it.annotations.any { it.type == entrypoint } }
-        if (mainFunction.name != "main") {
-            goSourceCode.append(
-                """
-                func main() {
-                    ${mainFunction.name}()
-                }
-                
-            """.trimIndent()
-            )
-        }
+        goSourceCode.append(
+            """
+            func main() {
+                ${mainFunction.name.asIdentifier()}()
+            }
+            
+        """.trimIndent()
+        )
 
         source.functions.forEach { goSourceCode.append(UserDefinedFunction(it).generateCode()) }
         stdlib.values.forEach { goSourceCode.append(it.generateCode()) }
@@ -52,7 +50,11 @@ class GoBackend : Backend {
         val entrypoint = FullyQualifiedType(listOf("stdlib", "entrypoint"))
 
         private val println = NativeFunction(
-            "" // we can just use the builtin println function
+            """
+            func stdlib_io_println(arg string) {
+                println(arg)                            
+            }
+            """.trimIndent()
         )
 
         val stdlib = mapOf(
@@ -72,14 +74,13 @@ class GoBackend : Backend {
 
     class UserDefinedFunction(private val function: Function) : GoFunction {
         override fun generateCode(): String {
-            val goSourceCode = StringBuilder("func ").append(function.name).append("() {\n")
+            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier()).append("() {\n")
             function.body.forEach { statement ->
                 goSourceCode.append("\t")
                 goSourceCode.append(
                     when (statement) {
-//                    TODO packages
                         is Statement.FunctionCallStatement ->
-                            statement.functionCall.function.path.last() + "(" + statement.functionCall.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")\n"
+                            statement.functionCall.function.asIdentifier() + "(" + statement.functionCall.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")\n"
                     }
                 )
             }
@@ -94,3 +95,5 @@ class GoBackend : Backend {
         }
     }
 }
+
+private fun FullyQualifiedType.asIdentifier() = path.joinToString("_")
