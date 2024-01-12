@@ -67,7 +67,9 @@ class Parser {
             stream.advance()
             stream.expectType<Token.Whitespace>()
             val name = stream.expectType<Token.Alphanumeric>().value
-            stream.expect(Token.Symbol("():"))
+            stream.expect(openingRoundBracket)
+            stream.expect(closingRoundBracket)
+            stream.expect(colon)
             stream.expect(Token.Newline)
             val indent = stream.expectType<Token.Whitespace>().amount
             return TopLevelDefinition.Function(
@@ -120,10 +122,10 @@ class Parser {
     companion object {
         val importKeyword = Token.Alphanumeric("import")
         val defKeyword = Token.Alphanumeric("def")
-        val atSign = Token.Symbol("@")
-        val openingRoundBracket = Token.Symbol("(")
-        val closingRoundBracket = Token.Symbol(")")
-        val colon = Token.Symbol(":")
+        val atSign = Token.Symbol('@')
+        val openingRoundBracket = Token.Symbol('(')
+        val closingRoundBracket = Token.Symbol(')')
+        val colon = Token.Symbol(':')
     }
 
     private class TokenStream(private val tokens: List<Token>) {

@@ -19,11 +19,10 @@ class Lexer {
 
             while (pos < line.length) {
                 if (isSymbol(line[pos])) {
-                    val start = pos
                     while (pos < line.length && isSymbol(line[pos])) {
+                        tokens += Token.Symbol(line[pos])
                         pos++
                     }
-                    tokens += Token.Symbol(line.substring(start, pos))
                 } else if (line[pos] == ' ') {
                     val start = pos
                     while (pos < line.length && line[pos] == ' ') {
@@ -73,6 +72,6 @@ sealed interface Token {
     data object Newline: Token
     data object EmptyLine: Token
     data class Alphanumeric(val value: String): Token
-    data class Symbol(val value: String): Token
+    data class Symbol(val value: Char): Token
     data class StringValue(val value: String): Token
 }
