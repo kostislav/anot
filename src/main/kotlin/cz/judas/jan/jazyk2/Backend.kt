@@ -1,5 +1,6 @@
 package cz.judas.jan.jazyk2
 
+import cz.judas.jan.jazyk2.Stdlib.entrypoint
 import cz.judas.jan.jazyk2.ast.typed.Expression
 import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
 import cz.judas.jan.jazyk2.ast.typed.Function
@@ -38,7 +39,7 @@ class GoBackend : Backend {
         )
 
         source.functions.forEach { goSourceCode.append(UserDefinedFunction(it).generateCode()) }
-        stdlib.values.forEach { goSourceCode.append(it.generateCode()) }
+        stdlibGoImpl.values.forEach { goSourceCode.append(it.generateCode()) }
 
         val goFile = buildDir / "main.go"
         goFile.writeText(goSourceCode.toString())
@@ -47,8 +48,6 @@ class GoBackend : Backend {
     }
 
     companion object {
-        val entrypoint = FullyQualifiedType(listOf("stdlib", "entrypoint"))
-
         private val println = NativeFunction(
             """
             func stdlib_io_println(arg string) {
@@ -57,8 +56,8 @@ class GoBackend : Backend {
             """.trimIndent()
         )
 
-        val stdlib = mapOf(
-            FullyQualifiedType(listOf("stdlib", "io", "println")) to println
+        val stdlibGoImpl = mapOf(
+            Stdlib.println to println
         )
     }
 
