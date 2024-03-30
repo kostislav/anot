@@ -2,10 +2,8 @@ package cz.judas.jan.jazyk2
 
 import cz.judas.jan.jazyk2.ast.untyped.Annotation
 import cz.judas.jan.jazyk2.ast.untyped.Expression
-import cz.judas.jan.jazyk2.ast.untyped.FunctionCall
 import cz.judas.jan.jazyk2.ast.untyped.ImportStatement
 import cz.judas.jan.jazyk2.ast.untyped.SourceFile
-import cz.judas.jan.jazyk2.ast.untyped.Statement
 import cz.judas.jan.jazyk2.ast.untyped.TopLevelDefinition
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -75,7 +73,7 @@ class Parser {
             return TopLevelDefinition.Function(
                 annotations,
                 name,
-                statements(stream, indent)
+                body(stream, indent)
             )
         } else {
             throw RuntimeException("Just functions for now")
@@ -95,25 +93,22 @@ class Parser {
         return annotations
     }
 
-    private fun statements(stream: TokenStream, indent: Int): List<Statement> {
+    private fun body(stream: TokenStream, indent: Int): List<Expression> {
+        return listOf(expression(stream))
+    }
+
+    private fun expression(stream: TokenStream): Expression {
         val firstToken = stream.current()
-        if (firstToken is Token.Alphanumeric && stream.peekNext() == openingRoundBracket) {
+        return if (firstToken is Token.StringValue) {
+            stream.advance()
+            Expression.StringConstant(firstToken.value)
+        } else if (firstToken is Token.Alphanumeric && stream.peekNext() == openingRoundBracket) {
             stream.skip(2)
             val functionName = firstToken.value
             val parameters = listOf(expression(stream))
             stream.expect(closingRoundBracket)
             stream.expect(Token.Newline)
-            return listOf(Statement.FunctionCallStatement(FunctionCall(functionName, parameters)))
-        } else {
-            throw RuntimeException("Just function calls for now")
-        }
-    }
-
-    private fun expression(stream: TokenStream): Expression {
-        val firstToken = stream.current()
-        if (firstToken is Token.StringValue) {
-            stream.advance()
-            return Expression.StringConstant(firstToken.value)
+            Expression.FunctionCall(functionName, parameters)
         } else {
             throw RuntimeException("Just strings for now")
         }

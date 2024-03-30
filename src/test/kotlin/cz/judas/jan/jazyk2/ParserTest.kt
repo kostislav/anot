@@ -2,10 +2,8 @@ package cz.judas.jan.jazyk2
 
 import cz.judas.jan.jazyk2.ast.untyped.Annotation
 import cz.judas.jan.jazyk2.ast.untyped.Expression
-import cz.judas.jan.jazyk2.ast.untyped.FunctionCall
 import cz.judas.jan.jazyk2.ast.untyped.ImportStatement
 import cz.judas.jan.jazyk2.ast.untyped.SourceFile
-import cz.judas.jan.jazyk2.ast.untyped.Statement
 import cz.judas.jan.jazyk2.ast.untyped.TopLevelDefinition
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -39,11 +37,9 @@ class ParserTest {
                                 listOf(Annotation("entrypoint")),
                                 "hello",
                                 listOf(
-                                    Statement.FunctionCallStatement(
-                                        FunctionCall(
-                                            "println",
-                                            listOf(Expression.StringConstant("Hello, world"))
-                                        )
+                                    Expression.FunctionCall(
+                                        "println",
+                                        listOf(Expression.StringConstant("Hello, world"))
                                     )
                                 )
                             )

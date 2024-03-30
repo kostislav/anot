@@ -11,18 +11,13 @@ sealed interface TopLevelDefinition {
     data class Function(
         val annotations: List<Annotation>,
         val name: String,
-        val body: List<Statement>
+        val body: List<Expression>
     ) : TopLevelDefinition
 }
 
 data class Annotation(val type: String)
 
-sealed interface Statement {
-    data class FunctionCallStatement(val functionCall: FunctionCall) : Statement
-}
-
 sealed interface Expression {
     data class StringConstant(val value: String) : Expression
+    data class FunctionCall(val functionName: String, val arguments: List<Expression>): Expression
 }
-
-data class FunctionCall(val functionName: String, val arguments: List<Expression>)

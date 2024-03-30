@@ -5,14 +5,10 @@ import cz.judas.jan.jazyk2.ast.typed.Function
 import cz.judas.jan.jazyk2.ast.untyped.TopLevelDefinition
 import cz.judas.jan.jazyk2.ast.typed.Annotation as TypedAnnotation
 import cz.judas.jan.jazyk2.ast.typed.Expression as TypedExpression
-import cz.judas.jan.jazyk2.ast.typed.FunctionCall as TypedFunctionCall
 import cz.judas.jan.jazyk2.ast.typed.Package as TypedSourceFile
-import cz.judas.jan.jazyk2.ast.typed.Statement as TypedStatement
 import cz.judas.jan.jazyk2.ast.untyped.Annotation as UntypedAnnotation
 import cz.judas.jan.jazyk2.ast.untyped.Expression as UntypedExpression
-import cz.judas.jan.jazyk2.ast.untyped.FunctionCall as UntypedFunctionCall
 import cz.judas.jan.jazyk2.ast.untyped.SourceFile as UntypedSourceFile
-import cz.judas.jan.jazyk2.ast.untyped.Statement as UntypedStatement
 
 class Typer {
     fun addTypeInfo(filePackage: List<String>, untypedSourceFile: UntypedSourceFile): TypedSourceFile {
@@ -39,14 +35,8 @@ class Typer {
         return TypedAnnotation(importedSymbols.getValue(untypedAnnotation.type))
     }
 
-    private fun resolve(untypedStatement: UntypedStatement, importedSymbols: Map<String, FullyQualifiedType>): TypedStatement {
-        return when (untypedStatement) {
-            is UntypedStatement.FunctionCallStatement -> TypedStatement.FunctionCallStatement(resolve(untypedStatement.functionCall, importedSymbols))
-        }
-    }
-
-    private fun resolve(untypedFunctionCall: UntypedFunctionCall, importedSymbols: Map<String, FullyQualifiedType>): TypedFunctionCall {
-        return TypedFunctionCall(
+    private fun resolve(untypedFunctionCall: UntypedExpression.FunctionCall, importedSymbols: Map<String, FullyQualifiedType>): TypedExpression.FunctionCall {
+        return TypedExpression.FunctionCall(
             importedSymbols.getValue(untypedFunctionCall.functionName),
             untypedFunctionCall.arguments.map { resolve(it, importedSymbols) }
         )
@@ -55,6 +45,7 @@ class Typer {
     private fun resolve(untypedExpression: UntypedExpression, importedSymbols: Map<String, FullyQualifiedType>): TypedExpression {
         return when (untypedExpression) {
             is UntypedExpression.StringConstant -> TypedExpression.StringConstant(untypedExpression.value)
+            is UntypedExpression.FunctionCall -> resolve(untypedExpression, importedSymbols)
         }
     }
 }

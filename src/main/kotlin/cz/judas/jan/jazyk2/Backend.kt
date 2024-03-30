@@ -5,7 +5,6 @@ import cz.judas.jan.jazyk2.ast.typed.Expression
 import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
 import cz.judas.jan.jazyk2.ast.typed.Function
 import cz.judas.jan.jazyk2.ast.typed.Package
-import cz.judas.jan.jazyk2.ast.typed.Statement
 import java.nio.file.Path
 import kotlin.io.path.div
 import kotlin.io.path.writeLines
@@ -74,14 +73,9 @@ class GoBackend : Backend {
     class UserDefinedFunction(private val function: Function) : GoFunction {
         override fun generateCode(): String {
             val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier()).append("() {\n")
-            function.body.forEach { statement ->
+            function.body.forEach { expression ->
                 goSourceCode.append("\t")
-                goSourceCode.append(
-                    when (statement) {
-                        is Statement.FunctionCallStatement ->
-                            statement.functionCall.function.asIdentifier() + "(" + statement.functionCall.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")\n"
-                    }
-                )
+                goSourceCode.append(generateExpressionCode(expression))
             }
             goSourceCode.append("}\n")
             return goSourceCode.toString()
@@ -90,6 +84,8 @@ class GoBackend : Backend {
         private fun generateExpressionCode(expression: Expression): String {
             return when (expression) {
                 is Expression.StringConstant -> "\"${expression.value}\"" // TODO escaping
+                is Expression.FunctionCall ->
+                    expression.function.asIdentifier() + "(" + expression.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")\n"
             }
         }
     }
