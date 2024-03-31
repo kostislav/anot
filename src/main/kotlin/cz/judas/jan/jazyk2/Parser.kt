@@ -69,11 +69,10 @@ class Parser {
             stream.expect(closingRoundBracket)
             stream.expect(colon)
             stream.expect(Token.Newline)
-            val indent = stream.expectType<Token.Whitespace>().amount
             return TopLevelDefinition.Function(
                 annotations,
                 name,
-                body(stream, indent)
+                body(stream, 0)
             )
         } else {
             throw RuntimeException("Just functions for now")
@@ -93,8 +92,26 @@ class Parser {
         return annotations
     }
 
-    private fun body(stream: TokenStream, indent: Int): List<Expression> {
-        return listOf(expression(stream))
+    private fun body(stream: TokenStream, previousIndent: Int): List<Expression> {
+        val indent = stream.expectType<Token.Whitespace>().amount
+        if (indent <= previousIndent) {
+            throw RuntimeException("Indentation problem")
+        }
+        val result = mutableListOf(
+            expression(stream)
+        )
+        stream.expect(Token.Newline)
+        while (stream.hasNext()) {
+            val current = stream.current()
+            if (current is Token.Whitespace && current.amount == indent) {
+                stream.advance()
+                result += expression(stream)
+                stream.expect(Token.Newline)
+            } else {
+                break
+            }
+        }
+        return result
     }
 
     private fun expression(stream: TokenStream): Expression {
@@ -107,7 +124,6 @@ class Parser {
             val functionName = firstToken.value
             val parameters = listOf(expression(stream))
             stream.expect(closingRoundBracket)
-            stream.expect(Token.Newline)
             Expression.FunctionCall(functionName, parameters)
         } else {
             throw RuntimeException("Just strings for now")

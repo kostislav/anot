@@ -5,7 +5,6 @@ import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.div
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
 
 
 class Compiler(private val backend: Backend) {
@@ -17,12 +16,12 @@ class Compiler(private val backend: Backend) {
         buildDir.createDirectories()
         val sourceFile = (sourceDir / "src").listDirectoryEntries().first()
         val packageAsts = frontend.process(projectConfig.basePackage, sourceFile)
-        backend.compile(packageAsts, buildDir, sourceDir.name)
+        backend.compile(packageAsts, buildDir, projectConfig.name)
     }
 }
 
 
 fun main() {
     val compiler = Compiler(GoBackend())
-    compiler.compile(Path("examples/hello"))
+    compiler.compile(Path("examples/random_stuff"))
 }
