@@ -20,7 +20,7 @@ class GoBackend : Backend {
         val moduleFile = buildDir / "go.mod"
         moduleFile.writeLines(
             listOf(
-                "module jazyk/main",  // TODO configurable name
+                "module jazyk/${executableName}",
                 "go 1.20"
             )
         )
@@ -43,7 +43,7 @@ class GoBackend : Backend {
         source.functions.forEach { goSourceCode.append(UserDefinedFunction(it).generateCode()).append("\n") }
         stdlibGoImpl.values.forEach { goSourceCode.append(it.generateCode()).append("\n") }
 
-        val goFile = buildDir / "main.go"
+        val goFile = buildDir / "${executableName}.go"
         goFile.writeText(goSourceCode.toString())
         val process = ProcessBuilder(listOf("go", "build", "-ldflags", "-s -w")).directory(buildDir.toFile()).start()
         process.waitFor()

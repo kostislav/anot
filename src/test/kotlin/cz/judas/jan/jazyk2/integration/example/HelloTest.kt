@@ -16,7 +16,7 @@ class HelloTest {
 
         compiler.compile(Path("examples/hello"), workDir)
 
-        val process = ProcessBuilder("./main")
+        val process = ProcessBuilder("./hello")
             .directory(workDir.toFile())
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .start()
