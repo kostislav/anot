@@ -12,9 +12,9 @@ class Compiler(private val backend: Backend) {
     private val configReader = ProjectConfigReader()
     private val frontend = Frontend()
 
-    fun compile(sourceDir: Path) {
+    fun compile(sourceDir: Path, buildDir: Path = sourceDir  / "build") {
         val projectConfig = configReader.forProject(sourceDir)
-        val buildDir = (sourceDir / "build").createDirectories()
+        buildDir.createDirectories()
         val sourceFile = (sourceDir / "src").listDirectoryEntries().first()
         val packageAsts = frontend.process(projectConfig.basePackage, sourceFile)
         backend.compile(packageAsts, buildDir, sourceDir.name)

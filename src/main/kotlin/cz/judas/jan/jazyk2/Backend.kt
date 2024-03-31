@@ -25,20 +25,23 @@ class GoBackend : Backend {
             )
         )
 
-        val goSourceCode = StringBuilder("package main").append("\n")
+        val goSourceCode = StringBuilder("package main").append("\n\n")
+        goSourceCode.append("import ( \"os\" )\n")
 
         val mainFunction = source.functions.first { it.annotations.any { it.type == entrypoint } }
         goSourceCode.append(
             """
+                
             func main() {
                 ${mainFunction.name.asIdentifier()}()
             }
             
+            
         """.trimIndent()
         )
 
-        source.functions.forEach { goSourceCode.append(UserDefinedFunction(it).generateCode()) }
-        stdlibGoImpl.values.forEach { goSourceCode.append(it.generateCode()) }
+        source.functions.forEach { goSourceCode.append(UserDefinedFunction(it).generateCode()).append("\n") }
+        stdlibGoImpl.values.forEach { goSourceCode.append(it.generateCode()).append("\n") }
 
         val goFile = buildDir / "main.go"
         goFile.writeText(goSourceCode.toString())
@@ -50,7 +53,8 @@ class GoBackend : Backend {
         private val println = NativeFunction(
             """
             func stdlib_io_println(arg string) {
-                println(arg)                            
+                os.Stdout.WriteString(arg)                     
+                os.Stdout.WriteString("\n")                     
             }
             """.trimIndent()
         )
