@@ -1,5 +1,4 @@
-import:
-    /stdlib/io/println
+import { /stdlib/io/println }
 
 def hello():
     println('Hello')

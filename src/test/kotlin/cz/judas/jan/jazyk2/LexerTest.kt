@@ -32,8 +32,7 @@ class LexerTest {
         assertThat(
             parsedLines, equalTo(
                 listOf(
-                    Alphanumeric("import"), Symbol(':'), Newline,
-                    Whitespace(4), Symbol('/'), Alphanumeric("stdlib"), Symbol('/'), Alphanumeric("io"), Symbol('/'), Alphanumeric("println"), Newline,
+                    Alphanumeric("import"), Whitespace(1), Symbol('{'), Whitespace(1), Symbol('/'), Alphanumeric("stdlib"), Symbol('/'), Alphanumeric("io"), Symbol('/'), Alphanumeric("println"), Whitespace(1), Symbol('}'), Newline,
                     EmptyLine,
                     Alphanumeric("def"), Whitespace(1), Alphanumeric("hello"), Symbol('('), Symbol(')'), Symbol(':'), Newline,
                     Whitespace(4), Alphanumeric("println"), Symbol('('), StringValue("Hello, world"), Symbol(')'), Newline

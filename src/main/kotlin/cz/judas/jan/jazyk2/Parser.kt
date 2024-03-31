@@ -23,13 +23,21 @@ class Parser {
         return if (stream.current() == importKeyword) {
             stream.advance()
             val imports = mutableListOf<ImportStatement>()
-            stream.expect(colon)
-            stream.expect(Token.Newline)
-            val indent = stream.expectType<Token.Whitespace>()
-            imports += importStatement(stream)
-            while (stream.current() != Token.EmptyLine) {
-                stream.expect(indent)
-                imports += importStatement(stream)
+            if (stream.current() == colon) {
+                stream.advance()
+                stream.expect(Token.Newline)
+                val indent = stream.expectType<Token.Whitespace>()
+                imports += importStatement(stream, Token.Newline)
+                while (stream.current() != Token.EmptyLine) {
+                    stream.expect(indent)
+                    imports += importStatement(stream, Token.Newline)
+                }
+            } else {
+                stream.expectType<Token.Whitespace>()
+                stream.expect(openingCurlyBracket)
+                stream.expectType<Token.Whitespace>()
+                imports += importStatement(stream, closingCurlyBracket)
+                stream.expect(Token.Newline)
             }
             stream.advance()
             imports
@@ -38,9 +46,9 @@ class Parser {
         }
     }
 
-    private fun importStatement(stream: TokenStream): ImportStatement {
+    private fun importStatement(stream: TokenStream, delimiter: Token): ImportStatement {
         val result = ImportStatement(
-            stream.consumeUntil { it is Token.Newline }
+            stream.consumeUntil { it == delimiter }
                 .filterIsInstance<Token.Alphanumeric>()
                 .map { it.value }
         )
@@ -136,6 +144,8 @@ class Parser {
         val atSign = Token.Symbol('@')
         val openingRoundBracket = Token.Symbol('(')
         val closingRoundBracket = Token.Symbol(')')
+        val openingCurlyBracket = Token.Symbol('{')
+        val closingCurlyBracket = Token.Symbol('}')
         val colon = Token.Symbol(':')
     }
 
