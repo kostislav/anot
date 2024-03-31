@@ -1,5 +1,6 @@
 package cz.judas.jan.jazyk2
 
+import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -16,7 +17,7 @@ class Compiler(private val backend: Backend) {
         buildDir.createDirectories()
         val sourceFile = (sourceDir / "src").listDirectoryEntries().first()
         val packageAsts = frontend.process(projectConfig.basePackage, sourceFile)
-        backend.compile(packageAsts, buildDir, projectConfig.name)
+        backend.compile(packageAsts, buildDir, FullyQualifiedType(projectConfig.basePackage + projectConfig.mainFunctionName), projectConfig.name)
     }
 }
 

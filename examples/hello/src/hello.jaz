@@ -1,7 +1,5 @@
 import:
     /stdlib/io/println
-    /stdlib/entrypoint
 
-@entrypoint
 def hello():
     println('Hello, world')

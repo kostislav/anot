@@ -12,12 +12,14 @@ class ProjectConfigReader {
 
         return ProjectConfig(
             contents.getValue("name"),
-            contents.getValue("base_package").split(".")
+            contents.getValue("base_package").split("."),
+            contents.getValue("main"),
         )
     }
 }
 
 data class ProjectConfig(
     val name: String,
-    val basePackage: List<String>
+    val basePackage: List<String>,
+    val mainFunctionName: String,
 )

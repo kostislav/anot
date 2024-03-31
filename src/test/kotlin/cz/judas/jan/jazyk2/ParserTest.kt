@@ -1,6 +1,5 @@
 package cz.judas.jan.jazyk2
 
-import cz.judas.jan.jazyk2.ast.untyped.Annotation
 import cz.judas.jan.jazyk2.ast.untyped.Expression
 import cz.judas.jan.jazyk2.ast.untyped.ImportStatement
 import cz.judas.jan.jazyk2.ast.untyped.SourceFile
@@ -30,11 +29,10 @@ class ParserTest {
                     SourceFile(
                         listOf(
                             ImportStatement(listOf("stdlib", "io", "println")),
-                            ImportStatement(listOf("stdlib", "entrypoint"))
                         ),
                         listOf(
                             TopLevelDefinition.Function(
-                                listOf(Annotation("entrypoint")),
+                                emptyList(),
                                 "hello",
                                 listOf(
                                     Expression.FunctionCall(

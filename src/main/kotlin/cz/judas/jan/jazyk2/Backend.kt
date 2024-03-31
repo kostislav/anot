@@ -1,6 +1,5 @@
 package cz.judas.jan.jazyk2
 
-import cz.judas.jan.jazyk2.Stdlib.entrypoint
 import cz.judas.jan.jazyk2.ast.typed.Expression
 import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
 import cz.judas.jan.jazyk2.ast.typed.Function
@@ -11,11 +10,11 @@ import kotlin.io.path.writeLines
 import kotlin.io.path.writeText
 
 interface Backend {
-    fun compile(source: Package, buildDir: Path, executableName: String)
+    fun compile(source: Package, buildDir: Path, mainFunction: FullyQualifiedType, executableName: String)
 }
 
 class GoBackend : Backend {
-    override fun compile(source: Package, buildDir: Path, executableName: String) {
+    override fun compile(source: Package, buildDir: Path, mainFunction: FullyQualifiedType, executableName: String) {
 
         val moduleFile = buildDir / "go.mod"
         moduleFile.writeLines(
@@ -28,12 +27,11 @@ class GoBackend : Backend {
         val goSourceCode = StringBuilder("package main").append("\n\n")
         goSourceCode.append("import ( \"os\" )\n")
 
-        val mainFunction = source.functions.first { it.annotations.any { it.type == entrypoint } }
         goSourceCode.append(
             """
                 
             func main() {
-                ${mainFunction.name.asIdentifier()}()
+                ${mainFunction.asIdentifier()}()
             }
             
             
