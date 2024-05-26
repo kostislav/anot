@@ -1,5 +1,8 @@
 import { /stdlib/io/println }
 
-def hello():
+def greet():
     println('Hello')
+
+def hello():
+    greet()
     println('World')

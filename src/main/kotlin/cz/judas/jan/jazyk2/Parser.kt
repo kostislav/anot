@@ -61,6 +61,7 @@ class Parser {
 
         while (stream.hasNext()) {
             definitions += topLevelDefinition(stream)
+            stream.dropWhile { it == Token.EmptyLine }
         }
 
         return definitions
@@ -75,11 +76,13 @@ class Parser {
             val name = stream.expectType<Token.Alphanumeric>().value
             stream.expect(openingRoundBracket)
             stream.expect(closingRoundBracket)
+//            TODO return type
             stream.expect(colon)
             stream.expect(Token.Newline)
             return TopLevelDefinition.Function(
                 annotations,
                 name,
+                null,
                 body(stream, 0)
             )
         } else {
@@ -130,8 +133,15 @@ class Parser {
         } else if (firstToken is Token.Alphanumeric && stream.peekNext() == openingRoundBracket) {
             stream.skip(2)
             val functionName = firstToken.value
-            val parameters = listOf(expression(stream))
-            stream.expect(closingRoundBracket)
+            val parameters = if (stream.current() == closingRoundBracket) {
+                stream.advance()
+                emptyList()
+            } else {
+                val parameters = listOf(expression(stream))
+//                TODO multiple
+                stream.expect(closingRoundBracket)
+                parameters
+            }
             Expression.FunctionCall(functionName, parameters)
         } else {
             throw RuntimeException("Just strings for now")

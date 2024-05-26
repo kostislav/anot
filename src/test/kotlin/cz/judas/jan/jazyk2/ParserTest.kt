@@ -34,6 +34,7 @@ class ParserTest {
                             TopLevelDefinition.Function(
                                 emptyList(),
                                 "hello",
+                                null,
                                 listOf(
                                     Expression.FunctionCall(
                                         "println",

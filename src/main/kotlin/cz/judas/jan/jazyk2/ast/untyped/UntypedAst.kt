@@ -8,9 +8,12 @@ data class SourceFile(
 data class ImportStatement(val importedPath: List<String>)
 
 sealed interface TopLevelDefinition {
+    val name: String
+
     data class Function(
         val annotations: List<Annotation>,
-        val name: String,
+        override val name: String,
+        val returnType: String?,
         val body: List<Expression>
     ) : TopLevelDefinition
 }

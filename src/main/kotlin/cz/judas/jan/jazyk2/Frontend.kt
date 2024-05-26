@@ -13,7 +13,8 @@ class Frontend {
         return sourceFile.reader().use { reader ->
             val tokens = lexer.parseTokens(reader)
             val ast = parser.parseFile(tokens)
-            typer.addTypeInfo(filePackage, ast)
+            val partiallyTypedFile = typer.addSignatureTypeInfo(filePackage, ast)
+            typer.addTypeInfo(partiallyTypedFile, Stdlib.symbolMap() + partiallyTypedFile.symbolMap())
         }
     }
 }

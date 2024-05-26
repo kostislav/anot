@@ -74,7 +74,9 @@ class GoBackend : Backend {
 
     class UserDefinedFunction(private val function: Function) : GoFunction {
         override fun generateCode(): String {
-            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier()).append("() {\n")
+            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier())
+            returnType(function.returnType)?.let(goSourceCode::append)
+            goSourceCode.append("() {\n")
             function.body.forEach { expression ->
                 goSourceCode.append("\t")
                 goSourceCode.append(generateExpressionCode(expression))
@@ -88,6 +90,14 @@ class GoBackend : Backend {
                 is Expression.StringConstant -> "\"${expression.value}\"" // TODO escaping
                 is Expression.FunctionCall ->
                     expression.function.asIdentifier() + "(" + expression.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")\n"
+            }
+        }
+
+        private fun returnType(type: FullyQualifiedType): String? {
+            if (type == Stdlib.void) {
+                return null
+            } else {
+                throw IllegalArgumentException("Unsupported return type ${type}")  // TODO more
             }
         }
     }
