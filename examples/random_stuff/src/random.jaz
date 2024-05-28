@@ -1,8 +1,9 @@
-import { /stdlib/io/println }
+import:
+    /stdlib/io/println
+    /stdlib/String
 
-def greet():
-    println('Hello')
+def makeGreeting() -> String:
+    'Hello world'
 
 def hello():
-    greet()
-    println('World')
+    println(makeGreeting())

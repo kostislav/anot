@@ -76,13 +76,21 @@ class Parser {
             val name = stream.expectType<Token.Alphanumeric>().value
             stream.expect(openingRoundBracket)
             stream.expect(closingRoundBracket)
-//            TODO return type
+            val returnType = if (stream.current() is Token.Whitespace) {
+                stream.advance()
+                stream.expect(Token.Symbol('-'))
+                stream.expect(Token.Symbol('>'))
+                stream.expectType(Token.Whitespace::class)
+                stream.expectType<Token.Alphanumeric>().value
+            } else {
+                null
+            }
             stream.expect(colon)
             stream.expect(Token.Newline)
             return TopLevelDefinition.Function(
                 annotations,
                 name,
-                null,
+                returnType,
                 body(stream, 0)
             )
         } else {

@@ -45,6 +45,9 @@ class GoBackend : Backend {
         goFile.writeText(goSourceCode.toString())
         val process = ProcessBuilder(listOf("go", "build", "-ldflags", "-s -w")).directory(buildDir.toFile()).start()
         process.waitFor()
+        if (process.exitValue() != 0) {
+            throw RuntimeException("Backend failed: " + process.errorStream.reader().readText())
+        }
     }
 
     companion object {
@@ -74,12 +77,17 @@ class GoBackend : Backend {
 
     class UserDefinedFunction(private val function: Function) : GoFunction {
         override fun generateCode(): String {
-            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier())
-            returnType(function.returnType)?.let(goSourceCode::append)
-            goSourceCode.append("() {\n")
-            function.body.forEach { expression ->
+            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier()).append("() ")
+            returnType(function.returnType)?.let { goSourceCode.append(it).append(" ") }
+            goSourceCode.append("{\n")
+            val bodyIterator = function.body.iterator()
+            while (bodyIterator.hasNext()) {
+                val expression = bodyIterator.next()
                 goSourceCode.append("\t")
-                goSourceCode.append(generateExpressionCode(expression))
+                if (function.returnType != Stdlib.void && !bodyIterator.hasNext()) {
+                    goSourceCode.append("return ")
+                }
+                goSourceCode.append(generateExpressionCode(expression)).append("\n")
             }
             goSourceCode.append("}\n")
             return goSourceCode.toString()
@@ -89,15 +97,15 @@ class GoBackend : Backend {
             return when (expression) {
                 is Expression.StringConstant -> "\"${expression.value}\"" // TODO escaping
                 is Expression.FunctionCall ->
-                    expression.function.asIdentifier() + "(" + expression.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")\n"
+                    expression.function.asIdentifier() + "(" + expression.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")"
             }
         }
 
         private fun returnType(type: FullyQualifiedType): String? {
-            if (type == Stdlib.void) {
-                return null
-            } else {
-                throw IllegalArgumentException("Unsupported return type ${type}")  // TODO more
+            return when (type) {
+                Stdlib.void -> null
+                Stdlib.string -> "string"
+                else -> throw IllegalArgumentException("Unsupported return type ${type}")  // TODO more
             }
         }
     }
