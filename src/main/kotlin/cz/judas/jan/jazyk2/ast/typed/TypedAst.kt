@@ -4,7 +4,11 @@ import cz.judas.jan.jazyk2.Stdlib
 
 data class Package(
     val functions: List<Function>
-)
+) {
+    operator fun plus(other: Package): Package {
+        return Package(functions + other.functions)
+    }
+}
 
 data class Function(
     val annotations: List<Annotation>,

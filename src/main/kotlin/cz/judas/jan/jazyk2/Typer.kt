@@ -16,7 +16,7 @@ import cz.judas.jan.jazyk2.ast.untyped.SourceFile as UntypedSourceFile
 class Typer {
     fun addSignatureTypeInfo(filePackage: List<String>, untypedSourceFile: UntypedSourceFile): PartiallyTypedSourceFile {
         val importedSymbols = untypedSourceFile.imports
-            .map { it.importedPath }
+            .map { if (it.isAbsolute) it.importedPath else filePackage + it.importedPath }
             .associate { it.last() to FullyQualifiedType(it) }
         val localDefinitions = untypedSourceFile.definitions
             .associate { it.name to FullyQualifiedType(filePackage + it.name) }

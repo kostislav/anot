@@ -5,7 +5,7 @@ data class SourceFile(
     val definitions: List<TopLevelDefinition>
 )
 
-data class ImportStatement(val importedPath: List<String>)
+data class ImportStatement(val importedPath: List<String>, val isAbsolute: Boolean)
 
 sealed interface TopLevelDefinition {
     val name: String

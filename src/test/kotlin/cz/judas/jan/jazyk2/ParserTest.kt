@@ -28,7 +28,7 @@ class ParserTest {
                 equalTo(
                     SourceFile(
                         listOf(
-                            ImportStatement(listOf("stdlib", "io", "println")),
+                            ImportStatement(listOf("stdlib", "io", "println"), isAbsolute = true),
                         ),
                         listOf(
                             TopLevelDefinition.Function(

@@ -47,10 +47,12 @@ class Parser {
     }
 
     private fun importStatement(stream: TokenStream, delimiter: Token): ImportStatement {
+        val tokens = stream.consumeUntil { it == delimiter }
         val result = ImportStatement(
-            stream.consumeUntil { it == delimiter }
+            tokens
                 .filterIsInstance<Token.Alphanumeric>()
-                .map { it.value }
+                .map { it.value },
+            isAbsolute = tokens.first() == slash,
         )
         stream.advance()
         return result
@@ -165,6 +167,7 @@ class Parser {
         val openingCurlyBracket = Token.Symbol('{')
         val closingCurlyBracket = Token.Symbol('}')
         val colon = Token.Symbol(':')
+        val slash = Token.Symbol('/')
     }
 
     private class TokenStream(private val tokens: List<Token>) {
