@@ -35,7 +35,7 @@ class Typer {
 
     fun addTypeInfo(sourceFile: PartiallyTypedSourceFile, symbolMap: SymbolMap): TypedSourceFile {
         val functions = sourceFile.functions
-            .map { resolve(it, sourceFile.filePackage, sourceFile.imports, symbolMap) }
+            .map { resolveFunction(it, sourceFile.filePackage, sourceFile.imports, symbolMap) }
 
         return TypedSourceFile(functions)
     }
@@ -47,25 +47,25 @@ class Typer {
         )
     }
 
-    private fun resolve(
+    private fun resolveFunction(
         partiallyTypedFunction: PartiallyTypedFunction,
         filePackage: List<String>,
         importedSymbols: Map<String, FullyQualifiedType>,
         symbolMap: SymbolMap,
     ): Function {
         return Function(
-            partiallyTypedFunction.annotations.map { resolve(it, importedSymbols) },
+            partiallyTypedFunction.annotations.map { resolveAnnotation(it, importedSymbols) },
             FullyQualifiedType(filePackage + partiallyTypedFunction.signature.name),
             partiallyTypedFunction.signature.returnType,
-            partiallyTypedFunction.body.map { resolve(it, importedSymbols, symbolMap) }
+            partiallyTypedFunction.body.map { resolveExpression(it, importedSymbols, symbolMap) }
         )
     }
 
-    private fun resolve(untypedAnnotation: UntypedAnnotation, importedSymbols: Map<String, FullyQualifiedType>): TypedAnnotation {
+    private fun resolveAnnotation(untypedAnnotation: UntypedAnnotation, importedSymbols: Map<String, FullyQualifiedType>): TypedAnnotation {
         return TypedAnnotation(importedSymbols.getValue(untypedAnnotation.type))
     }
 
-    private fun resolve(
+    private fun resolveFunctionCall(
         untypedFunctionCall: UntypedExpression.FunctionCall,
         importedSymbols: Map<String, FullyQualifiedType>,
         symbolMap: SymbolMap,
@@ -73,15 +73,15 @@ class Typer {
         val function = importedSymbols.getValue(untypedFunctionCall.functionName)
         return TypedExpression.FunctionCall(
             function,
-            untypedFunctionCall.arguments.map { resolve(it, importedSymbols, symbolMap) },
+            untypedFunctionCall.arguments.map { resolveExpression(it, importedSymbols, symbolMap) },
             symbolMap.functions.getValue(function).returnType,
         )
     }
 
-    private fun resolve(untypedExpression: UntypedExpression, importedSymbols: Map<String, FullyQualifiedType>, symbolMap: SymbolMap): TypedExpression {
+    private fun resolveExpression(untypedExpression: UntypedExpression, importedSymbols: Map<String, FullyQualifiedType>, symbolMap: SymbolMap): TypedExpression {
         return when (untypedExpression) {
             is UntypedExpression.StringConstant -> TypedExpression.StringConstant(untypedExpression.value)
-            is UntypedExpression.FunctionCall -> resolve(untypedExpression, importedSymbols, symbolMap)
+            is UntypedExpression.FunctionCall -> resolveFunctionCall(untypedExpression, importedSymbols, symbolMap)
         }
     }
 }
