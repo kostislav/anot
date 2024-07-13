@@ -35,7 +35,7 @@ class Typer {
 
     fun addTypeInfo(sourceFile: PartiallyTypedSourceFile, symbolMap: SymbolMap): TypedSourceFile {
         val functions = sourceFile.functions
-            .map { resolveFunction(it, sourceFile.filePackage, sourceFile.imports, symbolMap) }
+            .map { resolveFunction(it, sourceFile.filePackage, Scope.topLevel(sourceFile.imports, symbolMap)) }
 
         return TypedSourceFile(functions)
     }
@@ -50,38 +50,72 @@ class Typer {
     private fun resolveFunction(
         partiallyTypedFunction: PartiallyTypedFunction,
         filePackage: List<String>,
-        importedSymbols: Map<String, FullyQualifiedType>,
-        symbolMap: SymbolMap,
+        scope: Scope,
     ): Function {
         return Function(
-            partiallyTypedFunction.annotations.map { resolveAnnotation(it, importedSymbols) },
+            partiallyTypedFunction.annotations.map { resolveAnnotation(it, scope) },
             FullyQualifiedType(filePackage + partiallyTypedFunction.signature.name),
             partiallyTypedFunction.signature.returnType,
-            partiallyTypedFunction.body.map { resolveExpression(it, importedSymbols, symbolMap) }
+            partiallyTypedFunction.body.map { resolveExpression(it, scope) }
         )
     }
 
-    private fun resolveAnnotation(untypedAnnotation: UntypedAnnotation, importedSymbols: Map<String, FullyQualifiedType>): TypedAnnotation {
-        return TypedAnnotation(importedSymbols.getValue(untypedAnnotation.type))
+    private fun resolveAnnotation(untypedAnnotation: UntypedAnnotation, scope: Scope): TypedAnnotation {
+        return TypedAnnotation(scope.getClass(untypedAnnotation.type).type)
     }
 
     private fun resolveFunctionCall(
         untypedFunctionCall: UntypedExpression.FunctionCall,
-        importedSymbols: Map<String, FullyQualifiedType>,
-        symbolMap: SymbolMap,
+        scope: Scope,
     ): TypedExpression.FunctionCall {
-        val function = importedSymbols.getValue(untypedFunctionCall.functionName)
+        val function = scope.getFunction(untypedFunctionCall.functionName)
         return TypedExpression.FunctionCall(
-            function,
-            untypedFunctionCall.arguments.map { resolveExpression(it, importedSymbols, symbolMap) },
-            symbolMap.functions.getValue(function).returnType,
+            function.type,
+            untypedFunctionCall.arguments.map { resolveExpression(it, scope) },
+            function.signature.returnType,
         )
     }
 
-    private fun resolveExpression(untypedExpression: UntypedExpression, importedSymbols: Map<String, FullyQualifiedType>, symbolMap: SymbolMap): TypedExpression {
+    private fun resolveExpression(untypedExpression: UntypedExpression, scope: Scope): TypedExpression {
         return when (untypedExpression) {
             is UntypedExpression.StringConstant -> TypedExpression.StringConstant(untypedExpression.value)
-            is UntypedExpression.FunctionCall -> resolveFunctionCall(untypedExpression, importedSymbols, symbolMap)
+            is UntypedExpression.FunctionCall -> resolveFunctionCall(untypedExpression, scope)
+        }
+    }
+
+    private class Scope(
+        private val symbols: Map<String, Entry>,
+    ) {
+        sealed interface Entry {
+            data class Function(val type: FullyQualifiedType, val signature: FunctionSignature): Entry
+            data class Class(val type: FullyQualifiedType): Entry
+        }
+
+        fun getClass(name: String): Entry.Class {
+            return symbols.getValue(name) as Entry.Class
+        }
+
+        fun getFunction(name: String): Entry.Function {
+            return symbols.getValue(name) as Entry.Function
+        }
+
+        companion object {
+            fun topLevel(imports: Map<String, FullyQualifiedType>, symbolMap: SymbolMap): Scope {
+                return Scope(
+                    imports.mapValues { (_, type) -> resolve(type, symbolMap) }
+                )
+            }
+
+            private fun resolve(type: FullyQualifiedType, symbolMap: SymbolMap): Entry {
+                val function = symbolMap.functions[type]
+                return if (function !== null) {
+                    Entry.Function(type, function)
+                } else if (type in symbolMap.classes) {
+                    Entry.Class(type)
+                } else {
+                    throw RuntimeException("No symbol for type ${type}")
+                }
+            }
         }
     }
 }

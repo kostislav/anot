@@ -7,14 +7,15 @@ import cz.judas.jan.jazyk2.ast.untyped.Expression
 
 data class PartiallyTypedSourceFile(
     val filePackage: List<String>,
-    val imports: Map<String, FullyQualifiedType>,
+    val imports: Map<String, FullyQualifiedType>,  // TODO rename to topLevelSymbols
     val functions: List<PartiallyTypedFunction>,
 ) {
     fun symbolMap(): SymbolMap {
         return SymbolMap(
             functions
                 .map { it.signature }
-                .associateBy{ FullyQualifiedType(filePackage + it.name) }
+                .associateBy { FullyQualifiedType(filePackage + it.name) },
+            emptyMap(),
         )
     }
 }
@@ -28,4 +29,8 @@ data class PartiallyTypedFunction(
 data class FunctionSignature(
     val name: String,
     val returnType: FullyQualifiedType,
+)
+
+data class ClassSignature(
+    val name: String,
 )
