@@ -1,5 +1,6 @@
 package cz.judas.jan.jazyk2
 
+import cz.judas.jan.jazyk2.ast.FunctionParameter
 import cz.judas.jan.jazyk2.ast.FunctionSignature
 import cz.judas.jan.jazyk2.ast.PartiallyTypedFunction
 import cz.judas.jan.jazyk2.ast.PartiallyTypedSourceFile
@@ -43,6 +44,7 @@ class Typer {
     private fun resolveSignature(untypedFunction: TopLevelDefinition.Function, importedSymbols: Map<String, FullyQualifiedType>): FunctionSignature {
         return FunctionSignature(
             untypedFunction.name,
+            untypedFunction.parameters.map { FunctionParameter(it.name, importedSymbols.getValue(it.type)) },
             untypedFunction.returnType?.let { importedSymbols.getValue(it) } ?: Stdlib.void,
         )
     }
@@ -52,11 +54,13 @@ class Typer {
         filePackage: List<String>,
         scope: Scope,
     ): Function {
+        val innerScope = scope.child(partiallyTypedFunction.signature.parameters.associate { it.name to Scope.Entry.Variable(it.type) })
         return Function(
-            partiallyTypedFunction.annotations.map { resolveAnnotation(it, scope) },
+            partiallyTypedFunction.annotations.map { resolveAnnotation(it, innerScope) },
             FullyQualifiedType(filePackage + partiallyTypedFunction.signature.name),
+            partiallyTypedFunction.signature.parameters,
             partiallyTypedFunction.signature.returnType,
-            partiallyTypedFunction.body.map { resolveExpression(it, scope) }
+            partiallyTypedFunction.body.map { resolveExpression(it, innerScope) }
         )
     }
 
@@ -76,33 +80,56 @@ class Typer {
         )
     }
 
+    private fun resolveVariable(
+        variableReference: UntypedExpression.VariableReference,
+        scope: Scope,
+    ): TypedExpression.VariableReference {
+        return TypedExpression.VariableReference(variableReference.name, scope.getVariable(variableReference.name).type)
+    }
+
     private fun resolveExpression(untypedExpression: UntypedExpression, scope: Scope): TypedExpression {
         return when (untypedExpression) {
             is UntypedExpression.StringConstant -> TypedExpression.StringConstant(untypedExpression.value)
             is UntypedExpression.FunctionCall -> resolveFunctionCall(untypedExpression, scope)
+            is UntypedExpression.VariableReference -> resolveVariable(untypedExpression, scope)
         }
     }
 
     private class Scope(
         private val symbols: Map<String, Entry>,
+        private val parent: Scope?
     ) {
         sealed interface Entry {
             data class Function(val type: FullyQualifiedType, val signature: FunctionSignature): Entry
             data class Class(val type: FullyQualifiedType): Entry
+            data class Variable(val type: FullyQualifiedType): Entry
         }
 
         fun getClass(name: String): Entry.Class {
-            return symbols.getValue(name) as Entry.Class
+            return get(name) as Entry.Class
         }
 
         fun getFunction(name: String): Entry.Function {
-            return symbols.getValue(name) as Entry.Function
+            return get(name) as Entry.Function
+        }
+
+        fun getVariable(name: String): Entry.Variable {
+            return get(name) as Entry.Variable
+        }
+
+        fun child(newSymbols: Map<String, Entry>): Scope {
+            return Scope(newSymbols, this)
+        }
+
+        private fun get(name: String): Entry {
+            return symbols[name] ?: if (parent !== null) parent.get(name) else { throw RuntimeException("Symbol ${name} not found") }
         }
 
         companion object {
             fun topLevel(imports: Map<String, FullyQualifiedType>, symbolMap: SymbolMap): Scope {
                 return Scope(
-                    imports.mapValues { (_, type) -> resolve(type, symbolMap) }
+                    imports.mapValues { (_, type) -> resolve(type, symbolMap) },
+                    null,
                 )
             }
 

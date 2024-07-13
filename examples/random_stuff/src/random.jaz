@@ -1,6 +1,10 @@
 import:
     /stdlib/io/println
-    makeGreeting
+    /stdlib/String
+
+def greet(name: String):
+    println('Hello')
+    println(name)
 
 def hello():
-    println(makeGreeting())
+    greet('World')

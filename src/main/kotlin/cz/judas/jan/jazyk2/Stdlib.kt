@@ -1,6 +1,7 @@
 package cz.judas.jan.jazyk2
 
 import cz.judas.jan.jazyk2.ast.ClassSignature
+import cz.judas.jan.jazyk2.ast.FunctionParameter
 import cz.judas.jan.jazyk2.ast.FunctionSignature
 import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
 
@@ -16,7 +17,7 @@ object Stdlib {
     fun symbolMap(): SymbolMap {
         return SymbolMap(
             mapOf(
-                println to FunctionSignature("println", void)
+                println to FunctionSignature("println", listOf(FunctionParameter("value", string)), void)
             ),
             mapOf(
                 void to ClassSignature("Void"),

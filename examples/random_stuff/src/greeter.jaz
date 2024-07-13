@@ -1,4 +1,0 @@
-import { /stdlib/String }
-
-def makeGreeting() -> String:
-    'Hello world'

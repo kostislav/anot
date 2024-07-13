@@ -28,9 +28,13 @@ data class PartiallyTypedFunction(
 
 data class FunctionSignature(
     val name: String,
+    val parameters: List<FunctionParameter>,
     val returnType: FullyQualifiedType,
 )
+
 
 data class ClassSignature(
     val name: String,
 )
+
+data class FunctionParameter(val name: String, val type: FullyQualifiedType)

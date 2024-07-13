@@ -75,8 +75,17 @@ class Parser {
         if (stream.current() == defKeyword) {
             stream.advance()
             stream.expectType<Token.Whitespace>()
-            val name = stream.expectType<Token.Alphanumeric>().value
+            val functionName = stream.expectType<Token.Alphanumeric>().value
             stream.expect(openingRoundBracket)
+            val parameters = mutableListOf<TopLevelDefinition.Function.Parameter>()
+            while (stream.current() != closingRoundBracket) {
+                val parameterName = stream.expectType<Token.Alphanumeric>().value
+                stream.expect(colon)
+                stream.expectType<Token.Whitespace>()
+                val parameterType = stream.expectType<Token.Alphanumeric>().value
+                parameters += TopLevelDefinition.Function.Parameter(parameterName, parameterType)
+                // TODO more than one
+            }
             stream.expect(closingRoundBracket)
             val returnType = if (stream.current() is Token.Whitespace) {
                 stream.advance()
@@ -91,7 +100,8 @@ class Parser {
             stream.expect(Token.Newline)
             return TopLevelDefinition.Function(
                 annotations,
-                name,
+                functionName,
+                parameters,
                 returnType,
                 body(stream, 0)
             )
@@ -140,19 +150,25 @@ class Parser {
         return if (firstToken is Token.StringValue) {
             stream.advance()
             Expression.StringConstant(firstToken.value)
-        } else if (firstToken is Token.Alphanumeric && stream.peekNext() == openingRoundBracket) {
-            stream.skip(2)
-            val functionName = firstToken.value
-            val parameters = if (stream.current() == closingRoundBracket) {
-                stream.advance()
-                emptyList()
+        } else if (firstToken is Token.Alphanumeric) {
+            if (stream.peekNext() == openingRoundBracket) {
+                stream.skip(2)
+                val functionName = firstToken.value
+                val parameters = if (stream.current() == closingRoundBracket) {
+                    stream.advance()
+                    emptyList()
+                } else {
+                    val parameters = listOf(expression(stream))
+    //                TODO multiple
+                    stream.expect(closingRoundBracket)
+                    parameters
+                }
+                Expression.FunctionCall(functionName, parameters)
             } else {
-                val parameters = listOf(expression(stream))
-//                TODO multiple
-                stream.expect(closingRoundBracket)
-                parameters
+                val name = firstToken.value
+                stream.advance()
+                Expression.VariableReference(name)
             }
-            Expression.FunctionCall(functionName, parameters)
         } else {
             throw RuntimeException("Just strings for now")
         }

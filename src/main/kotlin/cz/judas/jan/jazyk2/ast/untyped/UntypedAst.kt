@@ -13,9 +13,12 @@ sealed interface TopLevelDefinition {
     data class Function(
         val annotations: List<Annotation>,
         override val name: String,
+        val parameters: List<Parameter>,
         val returnType: String?,
         val body: List<Expression>
-    ) : TopLevelDefinition
+    ) : TopLevelDefinition {
+        data class Parameter(val name: String, val type: String)
+    }
 }
 
 data class Annotation(val type: String)
@@ -23,4 +26,5 @@ data class Annotation(val type: String)
 sealed interface Expression {
     data class StringConstant(val value: String) : Expression
     data class FunctionCall(val functionName: String, val arguments: List<Expression>): Expression
+    data class VariableReference(val name: String): Expression
 }

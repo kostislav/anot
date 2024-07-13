@@ -77,7 +77,9 @@ class GoBackend : Backend {
 
     class UserDefinedFunction(private val function: Function) : GoFunction {
         override fun generateCode(): String {
-            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier()).append("() ")
+            val goSourceCode = StringBuilder("func ").append(function.name.asIdentifier()).append("(")
+            goSourceCode.append(function.parameters.map { "${it.name} ${nonVoidType(it.type)}" }.joinToString(","))
+            goSourceCode.append(") ")
             returnType(function.returnType)?.let { goSourceCode.append(it).append(" ") }
             goSourceCode.append("{\n")
             val bodyIterator = function.body.iterator()
@@ -98,14 +100,22 @@ class GoBackend : Backend {
                 is Expression.StringConstant -> "\"${expression.value}\"" // TODO escaping
                 is Expression.FunctionCall ->
                     expression.function.asIdentifier() + "(" + expression.arguments.joinToString(", ", transform = ::generateExpressionCode) + ")"
+                is Expression.VariableReference -> expression.name
             }
         }
 
         private fun returnType(type: FullyQualifiedType): String? {
             return when (type) {
                 Stdlib.void -> null
+                else -> nonVoidType(type)
+            }
+        }
+
+        private fun nonVoidType(type: FullyQualifiedType): String {
+            return when (type) {
+                Stdlib.void -> throw IllegalArgumentException("Unexpected void type")
                 Stdlib.string -> "string"
-                else -> throw IllegalArgumentException("Unsupported return type ${type}")  // TODO more
+                else -> throw IllegalArgumentException("Unsupported type ${type}")  // TODO more
             }
         }
     }
