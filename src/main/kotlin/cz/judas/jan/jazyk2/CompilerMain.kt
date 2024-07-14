@@ -23,6 +23,6 @@ class Compiler(private val backend: Backend) {
 
 
 fun main() {
-    val compiler = Compiler(GoBackend())
+    val compiler = Compiler(CBackend())
     compiler.compile(Path("examples/random_stuff"))
 }

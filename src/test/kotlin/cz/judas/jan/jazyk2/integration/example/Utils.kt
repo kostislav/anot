@@ -1,11 +1,11 @@
 package cz.judas.jan.jazyk2.integration.example
 
 import cz.judas.jan.jazyk2.Compiler
-import cz.judas.jan.jazyk2.GoBackend
+import cz.judas.jan.jazyk2.CBackend
 import java.nio.file.Path
 
 fun compileAndRun(sourceDir: Path, workDir: Path, executableName: String): String {
-    val compiler = Compiler(GoBackend())
+    val compiler = Compiler(CBackend())
 
     compiler.compile(sourceDir, workDir)
 
