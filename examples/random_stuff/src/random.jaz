@@ -2,9 +2,11 @@ import:
     /stdlib/io/println
     /stdlib/String
 
-def greet(name: String):
+def greet(name_1: String, name_2: String):
     println('Hello')
-    println(name)
+    println(name_1)
+    println('and')
+    println(name_2)
 
 def hello():
-    greet('World')
+    greet('Big', 'World')

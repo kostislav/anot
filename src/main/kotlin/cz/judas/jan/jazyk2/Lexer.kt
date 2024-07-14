@@ -3,7 +3,7 @@ package cz.judas.jan.jazyk2
 import java.io.Reader
 
 class Lexer {
-    private val symbols = setOf('/', '(', ')', '@', ':', '{', '}', '-', '>')
+    private val symbols = setOf('/', '(', ')', '@', ':', '{', '}', '-', '>', ',')
 
     fun parseTokens(input: Reader): List<Token> {
         return input.readLines()
@@ -31,10 +31,10 @@ class Lexer {
                     tokens += Token.Whitespace(pos - start)
                 } else if (isAlphanumeric(line[pos])) {
                     val start = pos
-                    while (pos < line.length && isAlphanumeric(line[pos])) {
+                    while (pos < line.length && (line[pos] == '_' || isAlphanumeric(line[pos]))) {
                         pos++
                     }
-                    tokens += Token.Alphanumeric(line.substring(start, pos))
+                    tokens += Token.Identifier(line.substring(start, pos))
                 } else if (line[pos] == '\'') {
                     pos++
                     val start = pos
@@ -71,7 +71,7 @@ sealed interface Token {
     data class Whitespace(val amount: Int) : Token
     data object Newline: Token
     data object EmptyLine: Token
-    data class Alphanumeric(val value: String): Token
+    data class Identifier(val value: String): Token
     data class Symbol(val value: Char): Token
     data class StringValue(val value: String): Token
 }

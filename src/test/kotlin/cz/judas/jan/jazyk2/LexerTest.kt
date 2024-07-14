@@ -1,6 +1,6 @@
 package cz.judas.jan.jazyk2
 
-import cz.judas.jan.jazyk2.Token.Alphanumeric
+import cz.judas.jan.jazyk2.Token.Identifier
 import cz.judas.jan.jazyk2.Token.EmptyLine
 import cz.judas.jan.jazyk2.Token.Newline
 import cz.judas.jan.jazyk2.Token.StringValue
@@ -32,10 +32,10 @@ class LexerTest {
         assertThat(
             parsedLines, equalTo(
                 listOf(
-                    Alphanumeric("import"), Whitespace(1), Symbol('{'), Whitespace(1), Symbol('/'), Alphanumeric("stdlib"), Symbol('/'), Alphanumeric("io"), Symbol('/'), Alphanumeric("println"), Whitespace(1), Symbol('}'), Newline,
+                    Identifier("import"), Whitespace(1), Symbol('{'), Whitespace(1), Symbol('/'), Identifier("stdlib"), Symbol('/'), Identifier("io"), Symbol('/'), Identifier("println"), Whitespace(1), Symbol('}'), Newline,
                     EmptyLine,
-                    Alphanumeric("def"), Whitespace(1), Alphanumeric("hello"), Symbol('('), Symbol(')'), Symbol(':'), Newline,
-                    Whitespace(4), Alphanumeric("println"), Symbol('('), StringValue("Hello, world"), Symbol(')'), Newline
+                    Identifier("def"), Whitespace(1), Identifier("hello"), Symbol('('), Symbol(')'), Symbol(':'), Newline,
+                    Whitespace(4), Identifier("println"), Symbol('('), StringValue("Hello, world"), Symbol(')'), Newline
                 )
             )
         )

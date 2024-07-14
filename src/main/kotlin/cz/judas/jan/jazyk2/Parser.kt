@@ -50,7 +50,7 @@ class Parser {
         val tokens = stream.consumeUntil { it == delimiter }
         val result = ImportStatement(
             tokens
-                .filterIsInstance<Token.Alphanumeric>()
+                .filterIsInstance<Token.Identifier>()
                 .map { it.value },
             isAbsolute = tokens.first() == slash,
         )
@@ -75,16 +75,19 @@ class Parser {
         if (stream.current() == defKeyword) {
             stream.advance()
             stream.expectType<Token.Whitespace>()
-            val functionName = stream.expectType<Token.Alphanumeric>().value
+            val functionName = stream.expectType<Token.Identifier>().value
             stream.expect(openingRoundBracket)
             val parameters = mutableListOf<TopLevelDefinition.Function.Parameter>()
             while (stream.current() != closingRoundBracket) {
-                val parameterName = stream.expectType<Token.Alphanumeric>().value
+                val parameterName = stream.expectType<Token.Identifier>().value
                 stream.expect(colon)
                 stream.expectType<Token.Whitespace>()
-                val parameterType = stream.expectType<Token.Alphanumeric>().value
+                val parameterType = stream.expectType<Token.Identifier>().value
                 parameters += TopLevelDefinition.Function.Parameter(parameterName, parameterType)
-                // TODO more than one
+                if (stream.current() == comma) {
+                    stream.advance()
+                    stream.expectType<Token.Whitespace>()
+                }
             }
             stream.expect(closingRoundBracket)
             val returnType = if (stream.current() is Token.Whitespace) {
@@ -92,7 +95,7 @@ class Parser {
                 stream.expect(Token.Symbol('-'))
                 stream.expect(Token.Symbol('>'))
                 stream.expectType(Token.Whitespace::class)
-                stream.expectType<Token.Alphanumeric>().value
+                stream.expectType<Token.Identifier>().value
             } else {
                 null
             }
@@ -112,9 +115,9 @@ class Parser {
 
     private fun annotations(stream: TokenStream): List<Annotation> {
         val annotations = mutableListOf<Annotation>()
-        while (stream.current() == atSign && stream.peekNext() is Token.Alphanumeric) {
+        while (stream.current() == atSign && stream.peekNext() is Token.Identifier) {
             stream.advance()
-            annotations += Annotation((stream.current() as Token.Alphanumeric).value)
+            annotations += Annotation((stream.current() as Token.Identifier).value)
             stream.advance()
             if (stream.current() is Token.Whitespace || stream.current() == Token.Newline) {
                 stream.advance()
@@ -150,19 +153,19 @@ class Parser {
         return if (firstToken is Token.StringValue) {
             stream.advance()
             Expression.StringConstant(firstToken.value)
-        } else if (firstToken is Token.Alphanumeric) {
+        } else if (firstToken is Token.Identifier) {
             if (stream.peekNext() == openingRoundBracket) {
                 stream.skip(2)
                 val functionName = firstToken.value
-                val parameters = if (stream.current() == closingRoundBracket) {
-                    stream.advance()
-                    emptyList()
-                } else {
-                    val parameters = listOf(expression(stream))
-    //                TODO multiple
-                    stream.expect(closingRoundBracket)
-                    parameters
+                val parameters = mutableListOf<Expression>()
+                while (stream.current() != closingRoundBracket) {
+                    parameters += expression(stream)
+                    if (stream.current() == comma) {
+                        stream.advance()
+                        stream.expectType<Token.Whitespace>()
+                    }
                 }
+                stream.expect(closingRoundBracket)
                 Expression.FunctionCall(functionName, parameters)
             } else {
                 val name = firstToken.value
@@ -175,8 +178,8 @@ class Parser {
     }
 
     companion object {
-        val importKeyword = Token.Alphanumeric("import")
-        val defKeyword = Token.Alphanumeric("def")
+        val importKeyword = Token.Identifier("import")
+        val defKeyword = Token.Identifier("def")
         val atSign = Token.Symbol('@')
         val openingRoundBracket = Token.Symbol('(')
         val closingRoundBracket = Token.Symbol(')')
@@ -184,6 +187,7 @@ class Parser {
         val closingCurlyBracket = Token.Symbol('}')
         val colon = Token.Symbol(':')
         val slash = Token.Symbol('/')
+        val comma = Token.Symbol(',')
     }
 
     private class TokenStream(private val tokens: List<Token>) {
