@@ -1,4 +1,4 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
 import java.io.Reader
 

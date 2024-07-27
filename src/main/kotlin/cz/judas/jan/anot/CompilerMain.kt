@@ -1,6 +1,6 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
-import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.FullyQualifiedType
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories

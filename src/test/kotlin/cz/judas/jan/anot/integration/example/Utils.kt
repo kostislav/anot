@@ -1,7 +1,7 @@
-package cz.judas.jan.jazyk2.integration.example
+package cz.judas.jan.anot.integration.example
 
-import cz.judas.jan.jazyk2.Compiler
-import cz.judas.jan.jazyk2.CBackend
+import cz.judas.jan.anot.Compiler
+import cz.judas.jan.anot.CBackend
 import java.nio.file.Path
 
 fun compileAndRun(sourceDir: Path, workDir: Path, executableName: String): String {

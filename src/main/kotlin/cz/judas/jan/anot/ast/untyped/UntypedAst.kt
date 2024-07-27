@@ -1,4 +1,4 @@
-package cz.judas.jan.jazyk2.ast.untyped
+package cz.judas.jan.anot.ast.untyped
 
 data class SourceFile(
     val imports: List<ImportStatement>,

@@ -1,10 +1,10 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
-import cz.judas.jan.jazyk2.ast.untyped.Annotation
-import cz.judas.jan.jazyk2.ast.untyped.Expression
-import cz.judas.jan.jazyk2.ast.untyped.ImportStatement
-import cz.judas.jan.jazyk2.ast.untyped.SourceFile
-import cz.judas.jan.jazyk2.ast.untyped.TopLevelDefinition
+import cz.judas.jan.anot.ast.untyped.Annotation
+import cz.judas.jan.anot.ast.untyped.Expression
+import cz.judas.jan.anot.ast.untyped.ImportStatement
+import cz.judas.jan.anot.ast.untyped.SourceFile
+import cz.judas.jan.anot.ast.untyped.TopLevelDefinition
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.typeOf

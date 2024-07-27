@@ -1,11 +1,11 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
-import cz.judas.jan.jazyk2.Token.Identifier
-import cz.judas.jan.jazyk2.Token.EmptyLine
-import cz.judas.jan.jazyk2.Token.Newline
-import cz.judas.jan.jazyk2.Token.StringValue
-import cz.judas.jan.jazyk2.Token.Symbol
-import cz.judas.jan.jazyk2.Token.Whitespace
+import cz.judas.jan.anot.Token.Identifier
+import cz.judas.jan.anot.Token.EmptyLine
+import cz.judas.jan.anot.Token.Newline
+import cz.judas.jan.anot.Token.StringValue
+import cz.judas.jan.anot.Token.Symbol
+import cz.judas.jan.anot.Token.Whitespace
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach

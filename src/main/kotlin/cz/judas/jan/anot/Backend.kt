@@ -1,9 +1,9 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
-import cz.judas.jan.jazyk2.ast.typed.Expression
-import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
-import cz.judas.jan.jazyk2.ast.typed.Function
-import cz.judas.jan.jazyk2.ast.typed.Package
+import cz.judas.jan.anot.ast.typed.Expression
+import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.Function
+import cz.judas.jan.anot.ast.typed.Package
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.div

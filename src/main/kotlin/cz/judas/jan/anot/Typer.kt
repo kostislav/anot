@@ -1,18 +1,18 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
-import cz.judas.jan.jazyk2.ast.FunctionParameter
-import cz.judas.jan.jazyk2.ast.FunctionSignature
-import cz.judas.jan.jazyk2.ast.PartiallyTypedFunction
-import cz.judas.jan.jazyk2.ast.PartiallyTypedSourceFile
-import cz.judas.jan.jazyk2.ast.typed.FullyQualifiedType
-import cz.judas.jan.jazyk2.ast.typed.Function
-import cz.judas.jan.jazyk2.ast.untyped.TopLevelDefinition
-import cz.judas.jan.jazyk2.ast.typed.Annotation as TypedAnnotation
-import cz.judas.jan.jazyk2.ast.typed.Expression as TypedExpression
-import cz.judas.jan.jazyk2.ast.typed.Package as TypedSourceFile
-import cz.judas.jan.jazyk2.ast.untyped.Annotation as UntypedAnnotation
-import cz.judas.jan.jazyk2.ast.untyped.Expression as UntypedExpression
-import cz.judas.jan.jazyk2.ast.untyped.SourceFile as UntypedSourceFile
+import cz.judas.jan.anot.ast.FunctionParameter
+import cz.judas.jan.anot.ast.FunctionSignature
+import cz.judas.jan.anot.ast.PartiallyTypedFunction
+import cz.judas.jan.anot.ast.PartiallyTypedSourceFile
+import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.Function
+import cz.judas.jan.anot.ast.untyped.TopLevelDefinition
+import cz.judas.jan.anot.ast.typed.Annotation as TypedAnnotation
+import cz.judas.jan.anot.ast.typed.Expression as TypedExpression
+import cz.judas.jan.anot.ast.typed.Package as TypedSourceFile
+import cz.judas.jan.anot.ast.untyped.Annotation as UntypedAnnotation
+import cz.judas.jan.anot.ast.untyped.Expression as UntypedExpression
+import cz.judas.jan.anot.ast.untyped.SourceFile as UntypedSourceFile
 
 class Typer {
     fun addSignatureTypeInfo(filePackage: List<String>, untypedSourceFile: UntypedSourceFile): PartiallyTypedSourceFile {

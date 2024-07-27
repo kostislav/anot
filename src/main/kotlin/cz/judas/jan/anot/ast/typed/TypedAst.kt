@@ -1,7 +1,7 @@
-package cz.judas.jan.jazyk2.ast.typed
+package cz.judas.jan.anot.ast.typed
 
-import cz.judas.jan.jazyk2.Stdlib
-import cz.judas.jan.jazyk2.ast.FunctionParameter
+import cz.judas.jan.anot.Stdlib
+import cz.judas.jan.anot.ast.FunctionParameter
 
 data class Package(
     val functions: List<Function>

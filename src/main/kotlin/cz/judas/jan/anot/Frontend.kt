@@ -1,6 +1,6 @@
-package cz.judas.jan.jazyk2
+package cz.judas.jan.anot
 
-import cz.judas.jan.jazyk2.ast.typed.Package
+import cz.judas.jan.anot.ast.typed.Package
 import java.nio.file.Path
 import kotlin.io.path.reader
 
