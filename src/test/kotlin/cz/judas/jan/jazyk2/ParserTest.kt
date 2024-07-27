@@ -28,16 +28,19 @@ class ParserTest {
                 equalTo(
                     SourceFile(
                         listOf(
-                            ImportStatement(listOf("stdlib", "io", "println"), isAbsolute = true),
+                            ImportStatement(listOf("stdlib", "io", "Stdio"), isAbsolute = true),
                         ),
                         listOf(
                             TopLevelDefinition.Function(
                                 emptyList(),
                                 "hello",
-                                emptyList(),
+                                listOf(
+                                    TopLevelDefinition.Function.Parameter("stdio", "Stdio"),
+                                ),
                                 null,
                                 listOf(
-                                    Expression.FunctionCall(
+                                    Expression.MethodCall(
+                                        "stdio",
                                         "println",
                                         listOf(Expression.StringConstant("Hello, world"))
                                     )

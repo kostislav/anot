@@ -1,12 +1,10 @@
 import:
-    /stdlib/io/println
+    /stdlib/io/Stdio
     /stdlib/String
 
-def greet(name_1: String, name_2: String):
-    println('Hello')
-    println(name_1)
-    println('and')
-    println(name_2)
+def greet(name: String, stdio: Stdio):
+    stdio.println('Hello')
+    stdio.println(name)
 
-def hello():
-    greet('Big', 'World')
+def hello(stdio: Stdio):
+    greet('World', stdio)

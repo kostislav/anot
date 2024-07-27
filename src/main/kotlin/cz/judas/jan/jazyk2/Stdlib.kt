@@ -12,16 +12,17 @@ object Stdlib {
 
     val string = FullyQualifiedType(listOf("stdlib", "String"))
 
-    val println = FullyQualifiedType(listOf("stdlib", "io", "println"))
+    val stdio = FullyQualifiedType(listOf("stdlib", "io", "Stdio"))
 
     fun symbolMap(): SymbolMap {
         return SymbolMap(
+            emptyMap(),
             mapOf(
-                println to FunctionSignature("println", listOf(FunctionParameter("value", string)), void)
-            ),
-            mapOf(
-                void to ClassSignature("Void"),
-                string to ClassSignature("String"),
+                void to ClassSignature("Void", emptyMap()),
+                string to ClassSignature("String", emptyMap()),
+                stdio to ClassSignature("Stdio", mapOf(
+                    "println" to FunctionSignature("println", listOf(FunctionParameter("value", string)), void),
+                ))
             )
         )
     }

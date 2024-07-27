@@ -36,7 +36,7 @@ class Typer {
 
     fun addTypeInfo(sourceFile: PartiallyTypedSourceFile, symbolMap: SymbolMap): TypedSourceFile {
         val functions = sourceFile.functions
-            .map { resolveFunction(it, sourceFile.filePackage, Scope.topLevel(sourceFile.imports, symbolMap)) }
+            .map { resolveFunction(it, sourceFile.filePackage, Scope.topLevel(sourceFile.imports, symbolMap), symbolMap) }
 
         return TypedSourceFile(functions)
     }
@@ -53,6 +53,7 @@ class Typer {
         partiallyTypedFunction: PartiallyTypedFunction,
         filePackage: List<String>,
         scope: Scope,
+        symbolMap: SymbolMap,
     ): Function {
         val innerScope = scope.child(partiallyTypedFunction.signature.parameters.associate { it.name to Scope.Entry.Variable(it.type) })
         return Function(
@@ -60,7 +61,7 @@ class Typer {
             FullyQualifiedType(filePackage + partiallyTypedFunction.signature.name),
             partiallyTypedFunction.signature.parameters,
             partiallyTypedFunction.signature.returnType,
-            partiallyTypedFunction.body.map { resolveExpression(it, innerScope) }
+            partiallyTypedFunction.body.map { resolveExpression(it, innerScope, symbolMap) }
         )
     }
 
@@ -71,27 +72,43 @@ class Typer {
     private fun resolveFunctionCall(
         untypedFunctionCall: UntypedExpression.FunctionCall,
         scope: Scope,
+        symbolMap: SymbolMap,
     ): TypedExpression.FunctionCall {
         val function = scope.getFunction(untypedFunctionCall.functionName)
         return TypedExpression.FunctionCall(
             function.type,
-            untypedFunctionCall.arguments.map { resolveExpression(it, scope) },
+            untypedFunctionCall.arguments.map { resolveExpression(it, scope, symbolMap) },
             function.signature.returnType,
         )
     }
 
-    private fun resolveVariable(
-        variableReference: UntypedExpression.VariableReference,
+    private fun resolveMethodCall(
+        untypedMethodCall: UntypedExpression.MethodCall,
         scope: Scope,
-    ): TypedExpression.VariableReference {
-        return TypedExpression.VariableReference(variableReference.name, scope.getVariable(variableReference.name).type)
+        symbolMap: SymbolMap,
+    ): TypedExpression.MethodCall {
+        val receiver = resolveVariable(untypedMethodCall.receiver, scope)
+        return TypedExpression.MethodCall(
+            receiver,
+            untypedMethodCall.methodName,
+            untypedMethodCall.arguments.map { resolveExpression(it, scope, symbolMap) },
+            symbolMap.classes.getValue(receiver.type).methods.getValue(untypedMethodCall.methodName).returnType,
+        )
     }
 
-    private fun resolveExpression(untypedExpression: UntypedExpression, scope: Scope): TypedExpression {
+    private fun resolveVariable(
+        name: String,
+        scope: Scope,
+    ): TypedExpression.VariableReference {
+        return TypedExpression.VariableReference(name, scope.getVariable(name).type)
+    }
+
+    private fun resolveExpression(untypedExpression: UntypedExpression, scope: Scope, symbolMap: SymbolMap): TypedExpression {
         return when (untypedExpression) {
             is UntypedExpression.StringConstant -> TypedExpression.StringConstant(untypedExpression.value)
-            is UntypedExpression.FunctionCall -> resolveFunctionCall(untypedExpression, scope)
-            is UntypedExpression.VariableReference -> resolveVariable(untypedExpression, scope)
+            is UntypedExpression.FunctionCall -> resolveFunctionCall(untypedExpression, scope, symbolMap)
+            is UntypedExpression.MethodCall -> resolveMethodCall(untypedExpression, scope, symbolMap)
+            is UntypedExpression.VariableReference -> resolveVariable(untypedExpression.name, scope)
         }
     }
 

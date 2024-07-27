@@ -26,5 +26,6 @@ data class Annotation(val type: String)
 sealed interface Expression {
     data class StringConstant(val value: String) : Expression
     data class FunctionCall(val functionName: String, val arguments: List<Expression>): Expression
+    data class MethodCall(val receiver: String, val methodName: String, val arguments: List<Expression>): Expression
     data class VariableReference(val name: String): Expression
 }

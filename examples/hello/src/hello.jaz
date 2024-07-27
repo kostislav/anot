@@ -1,4 +1,4 @@
-import { /stdlib/io/println }
+import { /stdlib/io/Stdio }
 
-def hello():
-    println('Hello, world')
+def hello(stdio: Stdio):
+    stdio.println('Hello, world')

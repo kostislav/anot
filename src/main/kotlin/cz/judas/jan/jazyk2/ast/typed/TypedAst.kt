@@ -33,6 +33,10 @@ sealed interface Expression {
         override fun resultType(): FullyQualifiedType = returnType
     }
 
+    data class MethodCall(val receiver: VariableReference, val methodName: String, val arguments: List<Expression>, val returnType: FullyQualifiedType): Expression {
+        override fun resultType(): FullyQualifiedType = returnType
+    }
+
     data class VariableReference(val name: String, val type: FullyQualifiedType): Expression {
         override fun resultType(): FullyQualifiedType = type
     }

@@ -157,16 +157,17 @@ class Parser {
             if (stream.peekNext() == openingRoundBracket) {
                 stream.skip(2)
                 val functionName = firstToken.value
-                val parameters = mutableListOf<Expression>()
-                while (stream.current() != closingRoundBracket) {
-                    parameters += expression(stream)
-                    if (stream.current() == comma) {
-                        stream.advance()
-                        stream.expectType<Token.Whitespace>()
-                    }
-                }
+                val parameters = functionParameters(stream)
                 stream.expect(closingRoundBracket)
                 Expression.FunctionCall(functionName, parameters)
+            } else if (stream.peekNext() == period) {
+                val receiver = firstToken.value
+                stream.skip(2)
+                val methodName = stream.expectType<Token.Identifier>().value
+                stream.expect(openingRoundBracket)
+                val parameters = functionParameters(stream)
+                stream.expect(closingRoundBracket)
+                Expression.MethodCall(receiver, methodName, parameters)
             } else {
                 val name = firstToken.value
                 stream.advance()
@@ -175,6 +176,18 @@ class Parser {
         } else {
             throw RuntimeException("Just strings for now")
         }
+    }
+
+    private fun functionParameters(stream: TokenStream): MutableList<Expression> {
+        val parameters = mutableListOf<Expression>()
+        while (stream.current() != closingRoundBracket) {
+            parameters += expression(stream)
+            if (stream.current() == comma) {
+                stream.advance()
+                stream.expectType<Token.Whitespace>()
+            }
+        }
+        return parameters
     }
 
     companion object {
@@ -188,6 +201,7 @@ class Parser {
         val colon = Token.Symbol(':')
         val slash = Token.Symbol('/')
         val comma = Token.Symbol(',')
+        val period = Token.Symbol('.')
     }
 
     private class TokenStream(private val tokens: List<Token>) {

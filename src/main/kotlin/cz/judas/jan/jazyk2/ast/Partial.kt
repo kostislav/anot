@@ -35,6 +35,7 @@ data class FunctionSignature(
 
 data class ClassSignature(
     val name: String,
+    val methods: Map<String, FunctionSignature>,
 )
 
 data class FunctionParameter(val name: String, val type: FullyQualifiedType)
