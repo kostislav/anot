@@ -25,7 +25,7 @@ class LexerTest {
 
     @Test
     fun parsesHelloWorld() {
-        val input = Path("examples/hello/src/hello.jaz").reader()
+        val input = Path("examples/hello/src/hello.anot").reader()
 
         val parsedLines = lexer.parseTokens(input)
 
