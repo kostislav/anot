@@ -72,7 +72,7 @@ class Parser {
     private fun topLevelDefinition(stream: TokenStream): TopLevelDefinition {
         val annotations = annotations(stream)
 
-        if (stream.current() == defKeyword) {
+        if (stream.current() == funKeyword) {
             stream.advance()
             stream.expectType<Token.Whitespace>()
             val functionName = stream.expectType<Token.Identifier>().value
@@ -192,7 +192,7 @@ class Parser {
 
     companion object {
         val importKeyword = Token.Identifier("import")
-        val defKeyword = Token.Identifier("def")
+        val funKeyword = Token.Identifier("fun")
         val atSign = Token.Symbol('@')
         val openingRoundBracket = Token.Symbol('(')
         val closingRoundBracket = Token.Symbol(')')

@@ -34,7 +34,7 @@ class LexerTest {
                 listOf(
                     Identifier("import"), Whitespace(1), Symbol('{'), Whitespace(1), Symbol('/'), Identifier("stdlib"), Symbol('/'), Identifier("io"), Symbol('/'), Identifier("Stdio"), Whitespace(1), Symbol('}'), Newline,
                     EmptyLine,
-                    Identifier("def"), Whitespace(1), Identifier("hello"), Symbol('('), Identifier("stdio"), Symbol(':'), Whitespace(1), Identifier("Stdio"), Symbol(')'), Symbol(':'), Newline,
+                    Identifier("fun"), Whitespace(1), Identifier("hello"), Symbol('('), Identifier("stdio"), Symbol(':'), Whitespace(1), Identifier("Stdio"), Symbol(')'), Symbol(':'), Newline,
                     Whitespace(4), Identifier("stdio"), Symbol('.'), Identifier("println"), Symbol('('), StringValue("Hello, world"), Symbol(')'), Newline
                 )
             )
