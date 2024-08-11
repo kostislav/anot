@@ -99,7 +99,6 @@ class CBackend : Backend {
         val objectFile = buildDir / executableName
         cFile.writeText(cSourceCode.toString())
         runProcess(listOf("gcc", "-s", "-x", "c", "-std=gnu11", cFile.absolutePathString(), "-o", objectFile.absolutePathString()), buildDir)
-        runProcess(listOf("strip", "-R", ".comment", "-R", ".note", objectFile.absolutePathString()), buildDir)
     }
 
     private fun runProcess(command: List<String>, workDir: Path) {
