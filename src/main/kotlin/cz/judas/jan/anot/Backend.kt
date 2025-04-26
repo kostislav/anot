@@ -1,7 +1,7 @@
 package cz.judas.jan.anot
 
 import cz.judas.jan.anot.ast.typed.Expression
-import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.FullyQualifiedName
 import cz.judas.jan.anot.ast.typed.Function
 import cz.judas.jan.anot.ast.typed.Package
 import java.nio.file.Path
@@ -10,12 +10,12 @@ import kotlin.io.path.div
 import kotlin.io.path.writeText
 
 interface Backend {
-    fun compile(source: Package, buildDir: Path, mainFunction: FullyQualifiedType, executableName: String)
+    fun compile(source: Package, buildDir: Path, mainFunction: FullyQualifiedName, executableName: String)
 }
 
 
 class CBackend : Backend {
-    override fun compile(source: Package, buildDir: Path, mainFunction: FullyQualifiedType, executableName: String) {
+    override fun compile(source: Package, buildDir: Path, mainFunction: FullyQualifiedName, executableName: String) {
         val cSourceCode = StringBuilder("#include <stdio.h>").append("\n\n")
 
         val generatedStructNames = stdlibStructs.keys
@@ -30,7 +30,7 @@ class CBackend : Backend {
             .associate { (i, name) -> name to "f${i}" }
             .toMap()
 
-        val generatedMethodNames = mutableMapOf<Pair<FullyQualifiedType, String>, String>()
+        val generatedMethodNames = mutableMapOf<Pair<FullyQualifiedName, String>, String>()
         for ((type, struct) in stdlibStructs) {
             for (methodName in struct.methods.keys) {
                 generatedMethodNames[type to methodName] = "m${generatedMethodNames.size}"
@@ -110,13 +110,13 @@ class CBackend : Backend {
     }
 
     interface CFunction {
-        fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedType, String>): String
+        fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedName, String>): String
 
         fun generateDefinition(
             functionName: String,
-            generatedFunctionNames: Map<FullyQualifiedType, String>,
-            generatedMethodNames: Map<Pair<FullyQualifiedType, String>, String>,
-            generatedStructNames: Map<FullyQualifiedType, String>,
+            generatedFunctionNames: Map<FullyQualifiedName, String>,
+            generatedMethodNames: Map<Pair<FullyQualifiedName, String>, String>,
+            generatedStructNames: Map<FullyQualifiedName, String>,
         ): String
     }
 
@@ -125,15 +125,15 @@ class CBackend : Backend {
     }
 
     object Println : CFunction {
-        override fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedType, String>): String {
+        override fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedName, String>): String {
             return "void ${functionName}(${translateType(Stdlib.stdio, generatedStructNames)} stdio, const char *);"
         }
 
         override fun generateDefinition(
             functionName: String,
-            generatedFunctionNames: Map<FullyQualifiedType, String>,
-            generatedMethodNames: Map<Pair<FullyQualifiedType, String>, String>,
-            generatedStructNames: Map<FullyQualifiedType, String>,
+            generatedFunctionNames: Map<FullyQualifiedName, String>,
+            generatedMethodNames: Map<Pair<FullyQualifiedName, String>, String>,
+            generatedStructNames: Map<FullyQualifiedName, String>,
         ): String {
             return """
             void ${functionName}(${translateType(Stdlib.stdio, generatedStructNames)} stdio, const char *arg) {
@@ -148,11 +148,11 @@ class CBackend : Backend {
             Stdlib.stdio to Stdio
         )
 
-        val stdlibFunctions = emptyMap<FullyQualifiedType, CFunction>()
+        val stdlibFunctions = emptyMap<FullyQualifiedName, CFunction>()
     }
 
     class UserDefinedFunction(private val function: Function) : CFunction {
-        override fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedType, String>): String {
+        override fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedName, String>): String {
             return buildString {
                 append(translateType(function.returnType, generatedStructNames))
                 append(" ")
@@ -165,9 +165,9 @@ class CBackend : Backend {
 
         override fun generateDefinition(
             functionName: String,
-            generatedFunctionNames: Map<FullyQualifiedType, String>,
-            generatedMethodNames: Map<Pair<FullyQualifiedType, String>, String>,
-            generatedStructNames: Map<FullyQualifiedType, String>,
+            generatedFunctionNames: Map<FullyQualifiedName, String>,
+            generatedMethodNames: Map<Pair<FullyQualifiedName, String>, String>,
+            generatedStructNames: Map<FullyQualifiedName, String>,
         ): String {
             val cSourceCode = StringBuilder("${translateType(function.returnType, generatedStructNames)} ${functionName}(")
             cSourceCode.append(function.parameters.joinToString(", ") { "${translateType(it.type, generatedStructNames)} ${it.name}" })
@@ -187,8 +187,8 @@ class CBackend : Backend {
 
         private fun generateExpressionCode(
             expression: Expression,
-            generatedFunctionNames: Map<FullyQualifiedType, String>,
-            generatedMethodNames: Map<Pair<FullyQualifiedType, String>, String>,
+            generatedFunctionNames: Map<FullyQualifiedName, String>,
+            generatedMethodNames: Map<Pair<FullyQualifiedName, String>, String>,
         ): String {
             return when (expression) {
                 is Expression.StringConstant -> "\"${expression.value}\"" // TODO escaping
@@ -216,7 +216,7 @@ class CBackend : Backend {
 
 }
 
-private fun translateType(type: FullyQualifiedType, generatedStructNames: Map<FullyQualifiedType, String>): String {
+private fun translateType(type: FullyQualifiedName, generatedStructNames: Map<FullyQualifiedName, String>): String {
     return when (type) {
         Stdlib.void -> "void"
         Stdlib.string -> "const char *"

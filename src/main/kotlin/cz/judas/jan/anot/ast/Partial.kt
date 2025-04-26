@@ -1,13 +1,13 @@
 package cz.judas.jan.anot.ast
 
 import cz.judas.jan.anot.SymbolMap
-import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.FullyQualifiedName
 import cz.judas.jan.anot.ast.untyped.Annotation
 import cz.judas.jan.anot.ast.untyped.Expression
 
 data class PartiallyTypedSourceFile(
-    val filePackage: FullyQualifiedType,
-    val imports: Map<String, FullyQualifiedType>,  // TODO rename to topLevelSymbols
+    val filePackage: FullyQualifiedName,
+    val imports: Map<String, FullyQualifiedName>,  // TODO rename to topLevelSymbols
     val functions: List<PartiallyTypedFunction>,
 ) {
     fun symbolMap(): SymbolMap {
@@ -29,7 +29,7 @@ data class PartiallyTypedFunction(
 data class FunctionSignature(
     val name: String,
     val parameters: List<FunctionParameter>,
-    val returnType: FullyQualifiedType,
+    val returnType: FullyQualifiedName,
 )
 
 
@@ -38,4 +38,4 @@ data class ClassSignature(
     val methods: Map<String, FunctionSignature>,
 )
 
-data class FunctionParameter(val name: String, val type: FullyQualifiedType)
+data class FunctionParameter(val name: String, val type: FullyQualifiedName)

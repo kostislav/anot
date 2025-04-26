@@ -2,12 +2,12 @@ package cz.judas.jan.anot
 
 import cz.judas.jan.anot.ast.ClassSignature
 import cz.judas.jan.anot.ast.FunctionSignature
-import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.FullyQualifiedName
 
 // TODO use Entry?
 data class SymbolMap(
-    val functions: Map<FullyQualifiedType, FunctionSignature>,
-    val classes: Map<FullyQualifiedType, ClassSignature>,
+    val functions: Map<FullyQualifiedName, FunctionSignature>,
+    val classes: Map<FullyQualifiedName, ClassSignature>,
 ) {
     operator fun plus(other: SymbolMap): SymbolMap {
         return SymbolMap(

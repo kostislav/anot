@@ -4,7 +4,7 @@ import cz.judas.jan.anot.ast.FunctionParameter
 import cz.judas.jan.anot.ast.FunctionSignature
 import cz.judas.jan.anot.ast.PartiallyTypedFunction
 import cz.judas.jan.anot.ast.PartiallyTypedSourceFile
-import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.FullyQualifiedName
 import cz.judas.jan.anot.ast.typed.Function
 import cz.judas.jan.anot.ast.untyped.TopLevelDefinition
 import cz.judas.jan.anot.ast.typed.Annotation as TypedAnnotation
@@ -15,9 +15,9 @@ import cz.judas.jan.anot.ast.untyped.Expression as UntypedExpression
 import cz.judas.jan.anot.ast.untyped.SourceFile as UntypedSourceFile
 
 class Typer {
-    fun addSignatureTypeInfo(filePackage: FullyQualifiedType, untypedSourceFile: UntypedSourceFile): PartiallyTypedSourceFile {
+    fun addSignatureTypeInfo(filePackage: FullyQualifiedName, untypedSourceFile: UntypedSourceFile): PartiallyTypedSourceFile {
         val importedSymbols = untypedSourceFile.imports
-            .map { if (it.isAbsolute) { FullyQualifiedType(it.importedPath) } else { filePackage.child(it.importedPath) } }
+            .map { if (it.isAbsolute) { FullyQualifiedName(it.importedPath) } else { filePackage.child(it.importedPath) } }
             .associateBy { it.name() }
         val localDefinitions = untypedSourceFile.definitions
             .associate { it.name to filePackage.child(it.name) }
@@ -41,7 +41,7 @@ class Typer {
         return TypedSourceFile(sourceFile.filePackage, functions)
     }
 
-    private fun resolveSignature(untypedFunction: TopLevelDefinition.Function, importedSymbols: Map<String, FullyQualifiedType>): FunctionSignature {
+    private fun resolveSignature(untypedFunction: TopLevelDefinition.Function, importedSymbols: Map<String, FullyQualifiedName>): FunctionSignature {
         return FunctionSignature(
             untypedFunction.name,
             untypedFunction.parameters.map { FunctionParameter(it.name, importedSymbols.getValue(it.type)) },
@@ -116,9 +116,9 @@ class Typer {
         private val parent: Scope?
     ) {
         sealed interface Entry {
-            data class Function(val type: FullyQualifiedType, val signature: FunctionSignature): Entry
-            data class Class(val type: FullyQualifiedType): Entry
-            data class Variable(val type: FullyQualifiedType): Entry
+            data class Function(val type: FullyQualifiedName, val signature: FunctionSignature): Entry
+            data class Class(val type: FullyQualifiedName): Entry
+            data class Variable(val type: FullyQualifiedName): Entry
         }
 
         fun getClass(name: String): Entry.Class {
@@ -142,14 +142,14 @@ class Typer {
         }
 
         companion object {
-            fun topLevel(imports: Map<String, FullyQualifiedType>, symbolMap: SymbolMap): Scope {
+            fun topLevel(imports: Map<String, FullyQualifiedName>, symbolMap: SymbolMap): Scope {
                 return Scope(
                     imports.mapValues { (_, type) -> resolve(type, symbolMap) },
                     null,
                 )
             }
 
-            private fun resolve(type: FullyQualifiedType, symbolMap: SymbolMap): Entry {
+            private fun resolve(type: FullyQualifiedName, symbolMap: SymbolMap): Entry {
                 val function = symbolMap.functions[type]
                 return if (function !== null) {
                     Entry.Function(type, function)

@@ -3,16 +3,16 @@ package cz.judas.jan.anot
 import cz.judas.jan.anot.ast.ClassSignature
 import cz.judas.jan.anot.ast.FunctionParameter
 import cz.judas.jan.anot.ast.FunctionSignature
-import cz.judas.jan.anot.ast.typed.FullyQualifiedType
+import cz.judas.jan.anot.ast.typed.FullyQualifiedName
 
 object Stdlib {
-    val entrypoint = FullyQualifiedType(listOf("stdlib", "entrypoint"))
+    val entrypoint = FullyQualifiedName(listOf("stdlib", "entrypoint"))
 
-    val void = FullyQualifiedType(listOf("stdlib", "Void"))
+    val void = FullyQualifiedName(listOf("stdlib", "Void"))
 
-    val string = FullyQualifiedType(listOf("stdlib", "String"))
+    val string = FullyQualifiedName(listOf("stdlib", "String"))
 
-    val stdio = FullyQualifiedType(listOf("stdlib", "io", "Stdio"))
+    val stdio = FullyQualifiedName(listOf("stdlib", "io", "Stdio"))
 
     fun symbolMap(): SymbolMap {
         return SymbolMap(
