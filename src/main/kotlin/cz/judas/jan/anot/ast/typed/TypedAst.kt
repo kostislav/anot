@@ -4,16 +4,25 @@ import cz.judas.jan.anot.Stdlib
 import cz.judas.jan.anot.ast.FunctionParameter
 
 data class Package(
-    val functions: List<Function>
+    val name: FullyQualifiedType,
+    private val functions: List<Function>,
 ) {
     operator fun plus(other: Package): Package {
-        return Package(functions + other.functions)
+        if (this.name == other.name) {
+            return Package(name, functions + other.functions)
+        } else {
+            throw RuntimeException("Cannot combine package fragments for different packages")
+        }
+    }
+
+    fun functions(): Map<FullyQualifiedType, Function> {
+        return functions.associateBy { name.child(it.name) }
     }
 }
 
 data class Function(
     val annotations: List<Annotation>,
-    val name: FullyQualifiedType,
+    val name: String,
     val parameters: List<FunctionParameter>,
     val returnType: FullyQualifiedType,
     val body: List<Expression>,
@@ -45,4 +54,12 @@ sealed interface Expression {
 @JvmInline
 value class FullyQualifiedType(val path: List<String>) {
     fun name(): String = path.last()
+
+    fun child(name: String): FullyQualifiedType {
+        return FullyQualifiedType(path + name)
+    }
+
+    fun child(path: List<String>): FullyQualifiedType {
+        return FullyQualifiedType(path + path)
+    }
 }

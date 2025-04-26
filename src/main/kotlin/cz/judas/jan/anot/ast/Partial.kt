@@ -6,7 +6,7 @@ import cz.judas.jan.anot.ast.untyped.Annotation
 import cz.judas.jan.anot.ast.untyped.Expression
 
 data class PartiallyTypedSourceFile(
-    val filePackage: List<String>,
+    val filePackage: FullyQualifiedType,
     val imports: Map<String, FullyQualifiedType>,  // TODO rename to topLevelSymbols
     val functions: List<PartiallyTypedFunction>,
 ) {
@@ -14,7 +14,7 @@ data class PartiallyTypedSourceFile(
         return SymbolMap(
             functions
                 .map { it.signature }
-                .associateBy { FullyQualifiedType(filePackage + it.name) },
+                .associateBy { filePackage.child(it.name) },
             emptyMap(),
         )
     }

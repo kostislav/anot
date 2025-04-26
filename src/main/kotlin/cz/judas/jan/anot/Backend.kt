@@ -23,7 +23,7 @@ class CBackend : Backend {
             .associate { (i, name) -> name to "S${i}" }
             .toMap()
 
-        val userDefinedFunctions = source.functions.associate { it.name to UserDefinedFunction(it) }.toMap()
+        val userDefinedFunctions = source.functions().mapValues { UserDefinedFunction(it.value) }
         val allFunctions = stdlibFunctions + userDefinedFunctions
         val generatedFunctionNames = allFunctions.keys
             .withIndex()
@@ -89,7 +89,7 @@ class CBackend : Backend {
         cSourceCode.append(generatedFunctionNames.getValue(mainFunction))
         cSourceCode.append("(")
         // TODO more than one
-        if (source.functions.first { it.name == mainFunction }.parameters.map { it.type } == listOf(Stdlib.stdio)) {
+        if (source.functions().getValue(mainFunction).parameters.map { it.type } == listOf(Stdlib.stdio)) {
             cSourceCode.append("&stdio")
         }
         cSourceCode.append(");\n")

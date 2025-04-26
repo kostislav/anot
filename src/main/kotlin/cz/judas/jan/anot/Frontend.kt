@@ -1,5 +1,6 @@
 package cz.judas.jan.anot
 
+import cz.judas.jan.anot.ast.typed.FullyQualifiedType
 import cz.judas.jan.anot.ast.typed.Package
 import java.nio.file.Path
 import kotlin.io.path.reader
@@ -9,7 +10,7 @@ class Frontend {
     private val parser = Parser()
     private val typer = Typer()
 
-    fun process(filePackage: List<String>, sourceFiles: List<Path>): Package {
+    fun process(filePackage: FullyQualifiedType, sourceFiles: List<Path>): Package {
         val partiallyTypedFiles = sourceFiles.map { sourceFile ->
             sourceFile.reader().use { reader ->
                 val tokens = lexer.parseTokens(reader)

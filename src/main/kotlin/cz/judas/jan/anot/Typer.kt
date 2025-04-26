@@ -15,12 +15,12 @@ import cz.judas.jan.anot.ast.untyped.Expression as UntypedExpression
 import cz.judas.jan.anot.ast.untyped.SourceFile as UntypedSourceFile
 
 class Typer {
-    fun addSignatureTypeInfo(filePackage: List<String>, untypedSourceFile: UntypedSourceFile): PartiallyTypedSourceFile {
+    fun addSignatureTypeInfo(filePackage: FullyQualifiedType, untypedSourceFile: UntypedSourceFile): PartiallyTypedSourceFile {
         val importedSymbols = untypedSourceFile.imports
-            .map { if (it.isAbsolute) it.importedPath else filePackage + it.importedPath }
-            .associate { it.last() to FullyQualifiedType(it) }
+            .map { if (it.isAbsolute) { FullyQualifiedType(it.importedPath) } else { filePackage.child(it.importedPath) } }
+            .associateBy { it.name() }
         val localDefinitions = untypedSourceFile.definitions
-            .associate { it.name to FullyQualifiedType(filePackage + it.name) }
+            .associate { it.name to filePackage.child(it.name) }
         val symbols = importedSymbols + localDefinitions
 
         val functions = untypedSourceFile.definitions
@@ -36,9 +36,9 @@ class Typer {
 
     fun addTypeInfo(sourceFile: PartiallyTypedSourceFile, symbolMap: SymbolMap): TypedSourceFile {
         val functions = sourceFile.functions
-            .map { resolveFunction(it, sourceFile.filePackage, Scope.topLevel(sourceFile.imports, symbolMap), symbolMap) }
+            .map { resolveFunction(it, Scope.topLevel(sourceFile.imports, symbolMap), symbolMap) }
 
-        return TypedSourceFile(functions)
+        return TypedSourceFile(sourceFile.filePackage, functions)
     }
 
     private fun resolveSignature(untypedFunction: TopLevelDefinition.Function, importedSymbols: Map<String, FullyQualifiedType>): FunctionSignature {
@@ -51,14 +51,13 @@ class Typer {
 
     private fun resolveFunction(
         partiallyTypedFunction: PartiallyTypedFunction,
-        filePackage: List<String>,
         scope: Scope,
         symbolMap: SymbolMap,
     ): Function {
         val innerScope = scope.child(partiallyTypedFunction.signature.parameters.associate { it.name to Scope.Entry.Variable(it.type) })
         return Function(
             partiallyTypedFunction.annotations.map { resolveAnnotation(it, innerScope) },
-            FullyQualifiedType(filePackage + partiallyTypedFunction.signature.name),
+            partiallyTypedFunction.signature.name,
             partiallyTypedFunction.signature.parameters,
             partiallyTypedFunction.signature.returnType,
             partiallyTypedFunction.body.map { resolveExpression(it, innerScope, symbolMap) }

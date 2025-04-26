@@ -16,7 +16,7 @@ class Compiler(private val backend: Backend) {
         val projectConfig = configReader.forProject(sourceDir)
         buildDir.createDirectories()
         val sourceFiles = (sourceDir / "src").listDirectoryEntries() // TODO subdirs
-        val packageAsts = frontend.process(projectConfig.basePackage, sourceFiles)
+        val packageAsts = frontend.process(FullyQualifiedType(projectConfig.basePackage), sourceFiles)
         backend.compile(packageAsts, buildDir, FullyQualifiedType(projectConfig.basePackage + projectConfig.mainFunctionName), projectConfig.name)
     }
 }
