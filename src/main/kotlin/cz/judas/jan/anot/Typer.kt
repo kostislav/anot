@@ -36,7 +36,7 @@ class Typer {
 
     fun addTypeInfo(sourceFile: PartiallyTypedSourceFile, symbolMap: SymbolMap): TypedSourceFile {
         val functions = sourceFile.functions
-            .map { resolveFunction(it, Scope.topLevel(sourceFile.imports, symbolMap), symbolMap) }
+            .map { resolveFunction(it, Scope.topLevel(sourceFile.topLevelSymbols, symbolMap), symbolMap) }
 
         return TypedSourceFile(sourceFile.filePackage, functions)
     }

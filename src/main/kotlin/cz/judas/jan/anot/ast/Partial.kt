@@ -7,7 +7,7 @@ import cz.judas.jan.anot.ast.untyped.Expression
 
 data class PartiallyTypedSourceFile(
     val filePackage: FullyQualifiedName,
-    val imports: Map<String, FullyQualifiedName>,  // TODO rename to topLevelSymbols
+    val topLevelSymbols: Map<String, FullyQualifiedName>,
     val functions: List<PartiallyTypedFunction>,
 ) {
     fun symbolMap(): SymbolMap {
