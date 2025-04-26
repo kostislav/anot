@@ -1,5 +1,7 @@
 package cz.judas.jan.anot
 
+import cz.judas.jan.anot.ast.FunctionParameter
+import cz.judas.jan.anot.ast.FunctionSignature
 import cz.judas.jan.anot.ast.typed.Expression
 import cz.judas.jan.anot.ast.typed.FullyQualifiedName
 import cz.judas.jan.anot.ast.typed.Function
@@ -42,12 +44,12 @@ class CBackend : Backend {
         }
 
         allFunctions.entries.forEach { (name, function) ->
-            cSourceCode.append(function.generateDeclaration(generatedFunctionNames.getValue(name), generatedStructNames)).append("\n\n")
+            cSourceCode.append(generateFunctionDeclaration(function.signature.renamedTo(generatedFunctionNames.getValue(name)), generatedStructNames)).append("\n\n")
         }
 
         for ((type, struct) in stdlibStructs) {
             for ((methodName, method) in struct.methods) {
-                cSourceCode.append(method.generateDeclaration(generatedMethodNames.getValue(type to methodName), generatedStructNames)).append("\n\n")
+                cSourceCode.append(generateFunctionDeclaration(method.signature.renamedTo(generatedMethodNames.getValue(type to methodName)), generatedStructNames)).append("\n\n")
             }
         }
 
@@ -89,7 +91,7 @@ class CBackend : Backend {
         cSourceCode.append(generatedFunctionNames.getValue(mainFunction))
         cSourceCode.append("(")
         // TODO more than one
-        if (source.functions().getValue(mainFunction).parameters.map { it.type } == listOf(Stdlib.stdio)) {
+        if (source.functions().getValue(mainFunction).signature.parameters.map { it.type } == listOf(Stdlib.stdio)) {
             cSourceCode.append("&stdio")
         }
         cSourceCode.append(");\n")
@@ -109,8 +111,19 @@ class CBackend : Backend {
         }
     }
 
+    private fun generateFunctionDeclaration(signature: FunctionSignature,  generatedStructNames: Map<FullyQualifiedName, String>): String {
+        return buildString {
+            append(translateType(signature.returnType, generatedStructNames))
+            append(" ")
+            append(signature.name)
+            append("(")
+            append(signature.parameters.joinToString(", ") { translateType(it.type, generatedStructNames) })
+            append(");")
+        }
+    }
+
     interface CFunction {
-        fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedName, String>): String
+        val signature: FunctionSignature
 
         fun generateDefinition(
             functionName: String,
@@ -125,9 +138,7 @@ class CBackend : Backend {
     }
 
     object Println : CFunction {
-        override fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedName, String>): String {
-            return "void ${functionName}(${translateType(Stdlib.stdio, generatedStructNames)} stdio, const char *);"
-        }
+        override val signature = FunctionSignature("println", listOf(FunctionParameter("this", Stdlib.stdio), FunctionParameter("value", Stdlib.string)), Stdlib.void)
 
         override fun generateDefinition(
             functionName: String,
@@ -152,16 +163,7 @@ class CBackend : Backend {
     }
 
     class UserDefinedFunction(private val function: Function) : CFunction {
-        override fun generateDeclaration(functionName: String, generatedStructNames: Map<FullyQualifiedName, String>): String {
-            return buildString {
-                append(translateType(function.returnType, generatedStructNames))
-                append(" ")
-                append(functionName)
-                append("(")
-                append(function.parameters.joinToString(", ") { translateType(it.type, generatedStructNames) })
-                append(");")
-            }
-        }
+        override val signature = function.signature
 
         override fun generateDefinition(
             functionName: String,
@@ -169,14 +171,14 @@ class CBackend : Backend {
             generatedMethodNames: Map<Pair<FullyQualifiedName, String>, String>,
             generatedStructNames: Map<FullyQualifiedName, String>,
         ): String {
-            val cSourceCode = StringBuilder("${translateType(function.returnType, generatedStructNames)} ${functionName}(")
-            cSourceCode.append(function.parameters.joinToString(", ") { "${translateType(it.type, generatedStructNames)} ${it.name}" })
+            val cSourceCode = StringBuilder("${translateType(function.signature.returnType, generatedStructNames)} ${functionName}(")
+            cSourceCode.append(function.signature.parameters.joinToString(", ") { "${translateType(it.type, generatedStructNames)} ${it.name}" })
             cSourceCode.append(") {\n")
             val bodyIterator = function.body.iterator()
             while (bodyIterator.hasNext()) {
                 val expression = bodyIterator.next()
                 cSourceCode.append("\t")
-                if (function.returnType != Stdlib.void && !bodyIterator.hasNext()) {
+                if (function.signature.returnType != Stdlib.void && !bodyIterator.hasNext()) {
                     cSourceCode.append("return ")
                 }
                 cSourceCode.append(generateExpressionCode(expression, generatedFunctionNames, generatedMethodNames)).append(";\n")

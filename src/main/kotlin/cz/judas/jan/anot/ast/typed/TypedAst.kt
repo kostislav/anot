@@ -1,7 +1,7 @@
 package cz.judas.jan.anot.ast.typed
 
 import cz.judas.jan.anot.Stdlib
-import cz.judas.jan.anot.ast.FunctionParameter
+import cz.judas.jan.anot.ast.FunctionSignature
 
 data class Package(
     val name: FullyQualifiedName,
@@ -16,15 +16,13 @@ data class Package(
     }
 
     fun functions(): Map<FullyQualifiedName, Function> {
-        return functions.associateBy { name.child(it.name) }
+        return functions.associateBy { name.child(it.signature.name) }
     }
 }
 
 data class Function(
     val annotations: List<Annotation>,
-    val name: String,
-    val parameters: List<FunctionParameter>,
-    val returnType: FullyQualifiedName,
+    val signature: FunctionSignature,
     val body: List<Expression>,
 )
 

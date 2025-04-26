@@ -57,9 +57,7 @@ class Typer {
         val innerScope = scope.child(partiallyTypedFunction.signature.parameters.associate { it.name to Scope.Entry.Variable(it.type) })
         return Function(
             partiallyTypedFunction.annotations.map { resolveAnnotation(it, innerScope) },
-            partiallyTypedFunction.signature.name,
-            partiallyTypedFunction.signature.parameters,
-            partiallyTypedFunction.signature.returnType,
+            partiallyTypedFunction.signature,
             partiallyTypedFunction.body.map { resolveExpression(it, innerScope, symbolMap) }
         )
     }

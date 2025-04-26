@@ -30,7 +30,11 @@ data class FunctionSignature(
     val name: String,
     val parameters: List<FunctionParameter>,
     val returnType: FullyQualifiedName,
-)
+) {
+    fun renamedTo(newName: String): FunctionSignature {
+        return copy(name = newName)
+    }
+}
 
 
 data class ClassSignature(
