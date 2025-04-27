@@ -10,7 +10,7 @@ import kotlin.io.path.Path
 class HelloTest {
     @Test
     fun printsExpectedOutput(@TempDir workDir: Path) {
-        val result = compileAndRun(Path("examples/hello"), workDir, "hello")
+        val result = compileAndRun(Path("examples/projects/hello"), workDir, "hello")
 
         assertThat(result, equalTo("Hello, world\n"))
     }

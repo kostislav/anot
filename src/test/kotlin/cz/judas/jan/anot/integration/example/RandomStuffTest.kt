@@ -10,7 +10,7 @@ import kotlin.io.path.Path
 class RandomStuffTest {
     @Test
     fun printsExpectedOutput(@TempDir workDir: Path) {
-        val result = compileAndRun(Path("examples/random_stuff"), workDir, "random")
+        val result = compileAndRun(Path("examples/projects/random_stuff"), workDir, "random")
 
         assertThat(result, equalTo("Hello\nWorld\n"))
     }

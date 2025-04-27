@@ -18,7 +18,7 @@ class ParserTest {
         fun parsesHelloWorld() {
             val lexer = Lexer()
             val parser = Parser()
-            val input = Path("examples/hello/src/hello.anot").reader()
+            val input = Path("examples/projects/hello/src/hello.anot").reader()
 
             val tokens = lexer.parseTokens(input)
             val ast = parser.parseFile(tokens)
