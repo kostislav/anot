@@ -18,7 +18,7 @@ class ParserTest {
         fun parsesHelloWorld() {
             val lexer = Lexer()
             val parser = Parser()
-            val input = Path("examples/projects/hello/src/hello.anot").reader()
+            val input = Path("examples/single_files/hello.anot").reader()
 
             val tokens = lexer.parseTokens(input)
             val ast = parser.parseFile(tokens)
@@ -33,7 +33,7 @@ class ParserTest {
                         listOf(
                             TopLevelDefinition.Function(
                                 emptyList(),
-                                "hello",
+                                "main",
                                 listOf(
                                     TopLevelDefinition.Function.Parameter("stdio", "Stdio"),
                                 ),
