@@ -1,0 +1,9 @@
+import:
+    /stdlib/io/Stdio
+    /stdlib/String
+
+fun make_greeting() -> String:
+    'Hello returned world'
+
+fun main(stdio: Stdio):
+    stdio.println(make_greeting())
