@@ -85,7 +85,7 @@ class CBackend : Backend {
             }
         }
 
-        cSourceCode.append("void main() {\n")
+        cSourceCode.append("int main() {\n")
         cSourceCode.append("  ${generatedStructNames.getValue(Stdlib.stdio)} stdio;\n")
         cSourceCode.append("  ")
         cSourceCode.append(generatedFunctionNames.getValue(mainFunction))
@@ -95,12 +95,13 @@ class CBackend : Backend {
             cSourceCode.append("&stdio")
         }
         cSourceCode.append(");\n")
+        cSourceCode.append("  return 0;\n")
         cSourceCode.append("}")
 
         val cFile = buildDir / "${executableName}.c"
         val objectFile = buildDir / executableName
         cFile.writeText(cSourceCode.toString())
-        runProcess(listOf("gcc", "-s", "-x", "c", "-std=gnu11", cFile.absolutePathString(), "-o", objectFile.absolutePathString()), buildDir)
+        runProcess(listOf("gcc", "-s", "-x", "c", "-std=gnu11", "-Wall", "-Werror", cFile.absolutePathString(), "-o", objectFile.absolutePathString()), buildDir)
     }
 
     private fun runProcess(command: List<String>, workDir: Path) {
