@@ -1,0 +1,4 @@
+import { /stdlib/String }
+
+fun make_greeting() -> String:
+    'Hello from another file'

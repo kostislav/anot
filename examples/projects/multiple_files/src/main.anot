@@ -1,0 +1,6 @@
+import:
+    /stdlib/io/Stdio
+    make_greeting
+
+fun hello(stdio: Stdio):
+    stdio.println(make_greeting())

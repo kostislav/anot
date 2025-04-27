@@ -58,6 +58,6 @@ value class FullyQualifiedName(val path: List<String>) {
     }
 
     fun child(path: List<String>): FullyQualifiedName {
-        return FullyQualifiedName(path + path)
+        return FullyQualifiedName(this.path + path)
     }
 }
