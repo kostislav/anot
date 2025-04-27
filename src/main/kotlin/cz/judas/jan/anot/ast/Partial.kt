@@ -9,8 +9,16 @@ data class PartiallyTypedSourceFile(
     val filePackage: FullyQualifiedName,
     val topLevelSymbols: Map<String, FullyQualifiedName>,
     val functions: List<PartiallyTypedFunction>,
-) {
-    fun symbolMap(): SymbolMap {
+)
+
+fun List<PartiallyTypedSourceFile>.toSymbolMap(): SymbolMap {
+    val filePackages = map { it.filePackage }.toSet()
+    if (filePackages.size != 1) {
+        throw RuntimeException("Cannot combine source files from multiple packages")
+    } else {
+        val filePackage = filePackages.first()
+        val functions = map { it.functions }.flatten()
+
         return SymbolMap(
             functions
                 .map { it.signature }
